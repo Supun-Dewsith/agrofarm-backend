@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,11 +24,19 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
 
     public Optional<RefreshToken> findByToken(String token) {
         String sql = "SELECT user_id, token, expiry_date FROM refresh_tokens WHERE token = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new RefreshToken(
-                rs.getLong("user_id"),
-                rs.getString("token"),
-                rs.getObject("expiry_date", LocalDateTime.class)
-        ), token).stream().findFirst();
+
+        List<RefreshToken> results = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Timestamp timestamp = rs.getTimestamp("expiry_date");
+            Instant expiryDate = (timestamp != null) ? timestamp.toInstant() : null;
+
+            return new RefreshToken(
+                    rs.getLong("user_id"),
+                    rs.getString("token"),
+                    expiryDate
+            );
+        },token);
+
+        return results.stream().findFirst();
     }
 
     public void deleteByUserId(Long userId) {
