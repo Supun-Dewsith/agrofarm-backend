@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class userRepositoryImpl implements UserRepository {
+public class UserRepositoryImpl implements UserRepository {
     private final JdbcTemplate template;
 
     @Override
