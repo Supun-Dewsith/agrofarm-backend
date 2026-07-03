@@ -69,11 +69,19 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/error").permitAll()
+
+                        .requestMatchers("/api/crops/**").hasAuthority("CROPS")
+                        .requestMatchers("/api/inventory/**").hasAuthority("INVENTORY")
+                        .requestMatchers("/api/analytics/**").hasAuthority("ANALYTICS")
+
+                        .requestMatchers("/api/auth/register").hasAnyAuthority("ADMIN", "USER_MGMT")
+
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/user/**").hasAnyAuthority("FARMER", "ADMIN")
                         .requestMatchers("/api/test/**").hasAnyAuthority("SUPERVISOR", "FARMER", "ADMIN")
+
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
