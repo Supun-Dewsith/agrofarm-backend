@@ -19,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +46,10 @@ public class AuthServiceImpl implements AuthService {
         entity.setRole(role);
         entity.setEnabled(true);
 
+        if (request.getPermissions() != null) {
+            entity.setPermissions(new HashSet<>(request.getPermissions()));
+        }
+
         userRepository.save(entity);
 
         UserEntity savedUser = userRepository.findByUsername(entity.getUsername())
@@ -55,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = tokenService.generateAccessToken(userDetails);
         String refreshToken = tokenService.createAndSaveRefreshToken(savedUser.getId());
 
-        return new AuthResponse(accessToken, refreshToken, savedUser.getUsername(), role);
+        return new AuthResponse(accessToken, refreshToken, savedUser.getUsername(), role, savedUser.getPermissions());
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -82,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
                         .orElse("FARMER")
         );
 
-        return new AuthResponse(accessToken, refreshToken, userDetails.getUsername(),role);
+        return new AuthResponse(accessToken, refreshToken, userDetails.getUsername(),role ,entity.getPermissions());
     }
 
     public AuthResponse refreshToken(TokenRefreshRequest request){
@@ -101,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
                             .map(GrantedAuthority::getAuthority)
                             .findFirst().orElse("FARMER"));
 
-                    return new AuthResponse(newAccessToken, requestRefreshToken, user.getUsername(), role);
+                    return new AuthResponse(newAccessToken, requestRefreshToken, user.getUsername(), role ,user.getPermissions());
                 })
                 .orElseThrow(() -> new TokenRefreshException("Refresh token is invalid or not found!"));
     }
