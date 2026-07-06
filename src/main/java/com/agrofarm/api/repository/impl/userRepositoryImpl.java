@@ -10,12 +10,23 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
     private final JdbcTemplate template;
+
+    private void populatePermissions(UserEntity user) {
+        if (user == null) return;
+
+        String sql = "SELECT permission_key FROM user_permissions WHERE user_id = ?";
+        List<String> permissionList = template.query(sql, (rs, rowNum) -> rs.getString("permission_key"), user.getId());
+
+        user.setPermissions(new HashSet<>(permissionList));
+    }
 
     @Override
     public Optional<UserEntity> findByUsername(String username) {
@@ -32,6 +43,7 @@ public class UserRepositoryImpl implements UserRepository {
                             Role.valueOf(rs.getString("role")),
                             rs.getBoolean("enabled")
                     ),username);
+            populatePermissions(user);
             return Optional.ofNullable(user);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -49,8 +61,19 @@ public class UserRepositoryImpl implements UserRepository {
                 entity.getPhoneNumber(),
                 entity.getRole().name(),
                 entity.getEnabled());
-        Optional<UserEntity> user = findByUsername(entity.getUsername());
-        return user.orElse(null);
+        UserEntity savedUser = findByUsername(entity.getUsername()).orElse(null);
+
+        if (savedUser != null && entity.getPermissions() != null && !entity.getPermissions().isEmpty()) {
+            String sqlPerm = "INSERT INTO user_permissions (user_id, permission_key) VALUES (?, ?)";
+
+            template.batchUpdate(sqlPerm, entity.getPermissions(), entity.getPermissions().size(),
+                    (ps, permissionKey) -> {
+                        ps.setLong(1, savedUser.getId());
+                        ps.setString(2, permissionKey);
+                    });
+            populatePermissions(savedUser);
+        }
+        return savedUser;
     }
 
     @Override
@@ -70,6 +93,7 @@ public class UserRepositoryImpl implements UserRepository {
                 entity.setEnabled(rs.getBoolean("enabled"));
                 return entity;
             }, id);
+            populatePermissions(user);
             return Optional.ofNullable(user);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();

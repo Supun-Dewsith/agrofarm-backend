@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,4 +27,6 @@ public class RegisterRequest {
     private String password;
 
     private Role role;
+
+    private Set<String> permissions = new HashSet<>();
 }
