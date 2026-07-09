@@ -1,0 +1,17 @@
+package com.agrofarm.api.dto;
+
+import java.util.List;
+
+public class DailyWeather {
+
+        private List<String> time;
+        private List<Integer> weather_code;
+        private List<Double> temperature_2m_max;
+        private List<Double> temperature_2m_min;
+        private List<Double> uv_index_max;
+        private List<Double> rain_sum;
+        private List<Integer> precipitation_probability_max;
+
+        // getters and setters
+    
+}
