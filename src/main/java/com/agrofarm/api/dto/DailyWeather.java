@@ -1,7 +1,10 @@
 package com.agrofarm.api.dto;
 
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class DailyWeather {
 
         private List<String> time;
