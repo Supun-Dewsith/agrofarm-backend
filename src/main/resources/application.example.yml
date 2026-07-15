@@ -1,12 +1,20 @@
 spring:
-  application:
-    name: agrofarm-backend
   datasource:
     url: jdbc:mysql://localhost:3306/agrofarm_db?createDatabaseIfNotExist=true
     username: YOUR_DATABASE_USERNAME
     password: YOUR_DATABASE_PASSWORD
-    driver-class-name: com.mysql.cj.jdbc.Driver
 
-  jpa:
-    hibernate:
-      ddl-auto: validate
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+app:
+  jwt:
+    secret: YOUR_JWT_SECRET_KEY
+    expiration: 20000000
+
+  security:
+    initial-admin:
+      username: "ADMIN_USERNAME"
+      email: "admin@agrofarm.com"
+      password: "ADMIN_PASSWORD"
