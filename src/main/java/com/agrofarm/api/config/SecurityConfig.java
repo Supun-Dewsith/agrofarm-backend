@@ -83,6 +83,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/test/**").hasAnyAuthority("SUPERVISOR", "FARMER", "ADMIN")
 
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+
+
+                        // ----------- http config for weather controller. -------------
+                        .requestMatchers("/api/weather/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
