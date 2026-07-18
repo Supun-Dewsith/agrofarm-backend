@@ -1,13 +1,22 @@
 package com.agrofarm.api.service;
 
 import com.agrofarm.api.dto.CurrentWeather;
+import com.agrofarm.api.dto.UserData;
 import com.agrofarm.api.dto.WeatherResponse;
+import com.agrofarm.api.entity.FarmLocation;
+import com.agrofarm.api.repository.WeatherRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+
+@RequiredArgsConstructor  // Inject the repositories to the file automaticlly
 @Service
 public class WeatherService {
 
+        @Autowired
+        private WeatherRepository weatherRepository;
         private final RestClient restClient;
 
         public WeatherService() {
@@ -40,7 +49,18 @@ public class WeatherService {
             WeatherResponse response2 = getWeather(latitude,longitude);
             return response2.getCurrent();
 
-    }
+        }
+
+
+        public FarmLocation getLocation(UserData userdata){
+            String username = userdata.getUsername();
+            Long user_id = weatherRepository.findDetailsByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            FarmLocation location = weatherRepository.findLatitudeAndLongitudeFromUserID(user_id);
+            return location;
+
+        }
+
 
 
 
