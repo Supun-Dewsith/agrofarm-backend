@@ -1,17 +1,13 @@
 package com.agrofarm.api.controller;
 
-import com.agrofarm.api.dto.CurrentWeather;
 import com.agrofarm.api.dto.UserData;
-import com.agrofarm.api.dto.WeatherResponse;
 import com.agrofarm.api.entity.FarmLocation;
 import com.agrofarm.api.service.WeatherService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-
 
 @RestController
 @RequestMapping("/api/weather")
@@ -21,25 +17,21 @@ public class WeatherController {
     private final WeatherService weatherService;
 
     @GetMapping("/all")
-    public ResponseEntity<?> getWeather(HttpSession session) {
-        FarmLocation location = (FarmLocation) session.getAttribute("userLocation");
+    public ResponseEntity<?> getWeather() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        UserData logdata = new UserData();
+        logdata.setUsername(currentUsername);
+
+        FarmLocation location = weatherService.getLocation(logdata);
+
         if (location == null) {
-            return ResponseEntity.status(401).body("Location not set. Please send user data first.");
+            location = new FarmLocation();
+            location.setLatitude(6.9271);
+            location.setLongitude(79.8612);
         }
 
         return ResponseEntity.ok(weatherService.getWeather(location.getLatitude(), location.getLongitude()));
-
-
     }
-
-   @GetMapping("/current")
-    public ResponseEntity<?> getCurrentWeather(HttpSession session) {
-       FarmLocation location = (FarmLocation) session.getAttribute("userLocation");
-       if (location == null) {
-           return ResponseEntity.status(401).body("Location not set. Please send user data first.");
-       }
-
-       return ResponseEntity.ok(weatherService.getcurrentWeather(location.getLatitude(), location.getLongitude()));
-   }
-
 }
