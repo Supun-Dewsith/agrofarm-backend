@@ -47,13 +47,4 @@ public class WeatherController {
        return ResponseEntity.ok(weatherService.getcurrentWeather(location.getLatitude(), location.getLongitude()));
    }
 
-
-   @PostMapping("/senduser")
-    public ResponseEntity<String> getUserData(@RequestBody UserData logdata){
-       FarmLocation location = weatherService.getLocation(logdata);
-
-       return ResponseEntity.ok("Location initialized");
-
-   }
-
 }
