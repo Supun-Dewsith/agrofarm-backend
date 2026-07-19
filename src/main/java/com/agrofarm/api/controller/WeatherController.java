@@ -6,6 +6,7 @@ import com.agrofarm.api.dto.WeatherResponse;
 import com.agrofarm.api.entity.FarmLocation;
 import com.agrofarm.api.service.WeatherService;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/weather")
+@RequiredArgsConstructor
 public class WeatherController {
 
-    @Autowired
     private final WeatherService weatherService;
-
-
-    public WeatherController(WeatherService weatherService) {
-        this.weatherService = weatherService;
-    }
 
     @GetMapping("/all")
     public ResponseEntity<?> getWeather(HttpSession session) {
