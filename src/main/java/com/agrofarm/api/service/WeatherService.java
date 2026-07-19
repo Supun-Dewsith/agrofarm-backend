@@ -1,12 +1,9 @@
 package com.agrofarm.api.service;
 
 import com.agrofarm.api.dto.CurrentWeather;
-import com.agrofarm.api.dto.UserData;
 import com.agrofarm.api.dto.WeatherResponse;
 import com.agrofarm.api.entity.FarmLocation;
 import com.agrofarm.api.repository.WeatherRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -62,6 +59,8 @@ public class WeatherService {
             return location;
 
         }
+
+
 
 
 
