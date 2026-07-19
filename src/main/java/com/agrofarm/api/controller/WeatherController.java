@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 
 
-@CrossOrigin(origins = "http://localhost:5173/", allowCredentials = "true") // frontend port
 @RestController
 @RequestMapping("/api/weather")
 public class WeatherController {
