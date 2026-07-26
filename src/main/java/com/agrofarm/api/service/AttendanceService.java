@@ -1,4 +1,9 @@
 package com.agrofarm.api.service;
 
-public class AttendanceService {
+import com.agrofarm.api.dto.AttendanceDashboardResponse;
+import java.time.LocalDate;
+
+public interface AttendanceService {
+    AttendanceDashboardResponse getDashboardData(LocalDate date);
+    String markAttendance(Long userId);
 }
