@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -33,6 +35,14 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
+
+    @Bean
+    public RoleHierarchy roleHierarchy(){
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("ADMIN").implies("INVENTORY", "ANALYTICS", "CROPS", "USER_MGMT", "SUPERVISOR", "FARMER")
+                .build();
+
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -72,21 +82,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/error").permitAll()
 
-                        .requestMatchers("/api/crops/**").hasAnyAuthority("ADMIN","CROPS")
+                        .requestMatchers("/api/crops/**").hasAuthority("CROPS")
                         .requestMatchers("/api/inventory/**").hasAuthority("INVENTORY")
                         .requestMatchers("/api/analytics/**").hasAuthority("ANALYTICS")
 
-                        .requestMatchers("/api/auth/register").hasAnyAuthority("ADMIN", "USER_MGMT")
+                        .requestMatchers("/api/auth/register").hasAuthority("USER_MGMT")
 
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/user/**").hasAnyAuthority("FARMER", "ADMIN")
-                        .requestMatchers("/api/test/**").hasAnyAuthority("SUPERVISOR", "FARMER", "ADMIN")
+                        .requestMatchers("/user/**").hasAuthority("FARMER")
+                        .requestMatchers("/api/test/**").hasAnyAuthority("SUPERVISOR", "FARMER")
 
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-
-
-                        // ----------- http config for weather controller. -------------
                         .requestMatchers("/api/weather/**").permitAll()
                         .anyRequest().authenticated()
                 )
