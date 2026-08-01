@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/error").permitAll()
 
-                        .requestMatchers("/api/crops/**").hasAuthority("CROPS")
+                        .requestMatchers("/api/crops/**").hasAnyAuthority("ADMIN","CROPS")
                         .requestMatchers("/api/inventory/**").hasAuthority("INVENTORY")
                         .requestMatchers("/api/analytics/**").hasAuthority("ANALYTICS")
 
