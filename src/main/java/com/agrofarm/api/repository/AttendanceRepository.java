@@ -2,26 +2,37 @@ package com.agrofarm.api.repository;
 
 import com.agrofarm.api.entity.Attendance;
 import com.agrofarm.api.util.AttendanceStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface AttendanceRepository {
+public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
-    Attendance save(Attendance attendance);
+    /**
+     * Find attendance by user and date
+     */
+    Optional<Attendance> findByUserIdAndDate(Long userId, LocalDate date);
 
-    Optional<Attendance> findById(Long id);
+    /**
+     * Find all attendance records for a given date
+     */
+    List<Attendance> findByDate(LocalDate date);
 
-    List<Attendance> findAll();
+    /**
+     * Count attendance by date and status
+     */
+    long countByDateAndStatus(LocalDate date, AttendanceStatus status);
 
-    Attendance update(Attendance attendance);
-
-    void deleteById(Long id);
-
-    List<Attendance> findByStatus(AttendanceStatus status);
-
+    /**
+     * Find all attendance records of a user
+     */
     List<Attendance> findByUserId(Long userId);
 
-    List<Attendance> findByDate(LocalDate attendanceDate);
+    /**
+     * Check whether a user has already checked in today
+     */
+    boolean existsByUserIdAndDate(Long userId, LocalDate date);
+
 }
