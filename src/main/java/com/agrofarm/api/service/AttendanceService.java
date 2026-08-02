@@ -1,27 +1,44 @@
 package com.agrofarm.api.service;
 
-import com.agrofarm.api.entity.Attendance;
-import com.agrofarm.api.util.AttendanceStatus;
+import com.agrofarm.api.dto.AttendanceRequest;
+import com.agrofarm.api.dto.AttendanceResponse;
+import com.agrofarm.api.dto.QrAttendanceRequest;
+import com.agrofarm.api.dto.QrAttendanceResponse;
+import com.agrofarm.api.dto.attendance.AttendanceDashboardResponse;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface AttendanceService {
 
-    Attendance save(Attendance attendance);
+    /**
+     * Employee Check-In
+     */
+    AttendanceResponse checkIn(AttendanceRequest request);
 
-    Optional<Attendance> findById(Long id);
+    /**
+     * Employee Check-Out
+     */
+    AttendanceResponse checkOut(Long userId);
 
-    List<Attendance> findAll();
+    /**
+     * QR Attendance
+     */
+    QrAttendanceResponse processQrAttendance(QrAttendanceRequest request);
 
-    Attendance update(Attendance attendance);
+    /**
+     * Dashboard Summary
+     */
+    AttendanceDashboardResponse getDashboardSummary(LocalDate date);
 
-    void deleteById(Long id);
+    /**
+     * Today's Attendance List
+     */
+    List<AttendanceResponse> getAttendanceByDate(LocalDate date);
 
-    List<Attendance> findByStatus(AttendanceStatus status);
+    /**
+     * Employee Attendance History
+     */
+    List<AttendanceResponse> getAttendanceHistory(Long userId);
 
-    List<Attendance> findByUserId(Long userId);
-
-    List<Attendance> findByDate(LocalDate attendanceDate);
 }
