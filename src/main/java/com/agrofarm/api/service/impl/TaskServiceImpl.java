@@ -16,7 +16,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
+
     private final TaskRepository taskRepository;
+
+
 
     /**
      * Create Task
@@ -24,60 +27,79 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse createTask(TaskRequest request) {
 
+
         Task task = Task.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .priority(request.getPriority())
                 .status(request.getStatus())
                 .assigneeId(request.getAssigneeId())
+                .fieldId(request.getFieldId())
                 .dueDate(request.getDueDate())
-                .locationTag(request.getLocationTag())
                 .build();
 
+
         Task savedTask = taskRepository.save(task);
+
+        taskRepository.flush();
+
 
         return mapToResponse(savedTask);
     }
 
-    /**
-     * Entity -> DTO Mapping
-     */
-    private TaskResponse mapToResponse(Task task) {
 
-        return TaskResponse.builder()
-                .id(task.getId())
-                .title(task.getTitle())
-                .description(task.getDescription())
-                .priority(task.getPriority())
-                .status(task.getStatus())
-                .assigneeId(task.getAssigneeId())
-                .dueDate(task.getDueDate())
-                .locationTag(task.getLocationTag())
-                .build();
-    }
+
+
+
     /**
      * Get All Tasks
      */
     @Override
     public List<TaskResponse> getAllTasks(String statusFilter) {
 
+
         List<Task> tasks;
+
 
         if (statusFilter == null || statusFilter.isBlank()) {
 
+
             tasks = taskRepository.findAll();
+
 
         } else {
 
-            TaskStatus status = TaskStatus.valueOf(statusFilter.toUpperCase());
 
-            tasks = taskRepository.findByStatus(status);
+            try {
+
+                TaskStatus status =
+                        TaskStatus.valueOf(
+                                statusFilter.toUpperCase()
+                        );
+
+
+                tasks = taskRepository.findByStatus(status);
+
+
+            } catch (IllegalArgumentException e) {
+
+
+                throw new RuntimeException(
+                        "Invalid task status : " + statusFilter
+                );
+            }
         }
+
 
         return tasks.stream()
                 .map(this::mapToResponse)
                 .toList();
     }
+
+
+
+
+
 
     /**
      * Get Task By ID
@@ -85,34 +107,72 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse getTaskById(Long id) {
 
+
         Task task = taskRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Task not found with id : " + id));
+                        new RuntimeException(
+                                "Task not found with id : " + id
+                        )
+                );
+
 
         return mapToResponse(task);
     }
+
+
+
+
+
+
+
     /**
      * Update Task
      */
     @Override
-    public TaskResponse updateTask(Long id, TaskRequest request) {
+    public TaskResponse updateTask(
+            Long id,
+            TaskRequest request
+    ) {
+
 
         Task task = taskRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Task not found with id : " + id));
+                        new RuntimeException(
+                                "Task not found with id : " + id
+                        )
+                );
+
+
 
         task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
-        task.setPriority(request.getPriority());
-        task.setStatus(request.getStatus());
-        task.setAssigneeId(request.getAssigneeId());
-        task.setDueDate(request.getDueDate());
-        task.setLocationTag(request.getLocationTag());
 
-        Task updatedTask = taskRepository.save(task);
+        task.setDescription(request.getDescription());
+
+        task.setPriority(request.getPriority());
+
+        task.setStatus(request.getStatus());
+
+        task.setAssigneeId(request.getAssigneeId());
+
+        task.setFieldId(request.getFieldId());
+
+        task.setDueDate(request.getDueDate());
+
+
+
+        Task updatedTask =
+                taskRepository.save(task);
+
+
 
         return mapToResponse(updatedTask);
     }
+
+
+
+
+
+
 
     /**
      * Delete Task
@@ -120,12 +180,24 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void deleteTask(Long id) {
 
+
         Task task = taskRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Task not found with id : " + id));
+                        new RuntimeException(
+                                "Task not found with id : " + id
+                        )
+                );
+
 
         taskRepository.delete(task);
     }
+
+
+
+
+
+
+
 
     /**
      * Dashboard Summary
@@ -133,26 +205,85 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskDashboardResponse getTaskDashboardSummary() {
 
-        long totalTasks = taskRepository.count();
 
-        long pendingCount = taskRepository.countByStatus(TaskStatus.PENDING);
+        long totalTasks =
+                taskRepository.count();
 
-        long inProgressCount = taskRepository.countByStatus(TaskStatus.IN_PROGRESS);
 
-        long completedCount = taskRepository.countByStatus(TaskStatus.COMPLETED);
 
-        List<TaskResponse> tasks = taskRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
+        long pendingTasks =
+                taskRepository.countByStatus(
+                        TaskStatus.PENDING
+                );
+
+
+
+        long inProgressTasks =
+                taskRepository.countByStatus(
+                        TaskStatus.IN_PROGRESS
+                );
+
+
+
+        long completedTasks =
+                taskRepository.countByStatus(
+                        TaskStatus.COMPLETED
+                );
+
+
+
+        List<TaskResponse> tasks =
+                taskRepository.findAll()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+
+
 
         return new TaskDashboardResponse(
                 totalTasks,
-                pendingCount,
-                inProgressCount,
-                completedCount,
+                pendingTasks,
+                inProgressTasks,
+                completedTasks,
                 tasks
         );
+    }
+
+
+
+
+
+
+
+
+    /**
+     * Entity -> Response DTO
+     */
+    private TaskResponse mapToResponse(Task task) {
+
+
+        return TaskResponse.builder()
+
+                .id(task.getId())
+
+                .title(task.getTitle())
+
+                .description(task.getDescription())
+
+                .priority(task.getPriority())
+
+                .status(task.getStatus())
+
+                .assigneeId(task.getAssigneeId())
+
+                .fieldId(task.getFieldId())
+
+                .dueDate(task.getDueDate())
+
+                .createdAt(task.getCreatedAt())
+
+                .build();
     }
 
 }

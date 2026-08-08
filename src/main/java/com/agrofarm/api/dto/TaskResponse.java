@@ -5,6 +5,7 @@ import com.agrofarm.api.util.TaskStatus;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -25,8 +26,9 @@ public class TaskResponse {
 
     private Long assigneeId;
 
+    private Long fieldId;
+
     private LocalDate dueDate;
 
-    private String locationTag;
-
+    private LocalDateTime createdAt;
 }

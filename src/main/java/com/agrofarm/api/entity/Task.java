@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tasks")
@@ -34,12 +35,20 @@ public class Task {
     @Column(nullable = false)
     private TaskStatus status;
 
-    @Column(nullable = false)
+    @Column(name = "assignee_id", nullable = false)
     private Long assigneeId;
 
-    @Column(nullable = false)
+    @Column(name = "field_id", nullable = false)
+    private Long fieldId;
+
+    @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
 
-    private String locationTag;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
