@@ -4,5 +4,10 @@ CREATE TABLE farms(
     farm_name VARCHAR(200) NOT NULL,
     farm_address VARCHAR(200) NOT NULL ,
     latitude DECIMAL(10, 7) NOT NULL ,
-    longtitude DECIMAL(11, 7) NOT NULL
+    longtitude DECIMAL(11, 7) NOT NULL ,
+
+ CONSTRAINT fk_farm_owner
+        FOREIGN KEY (owner_id)
+            REFERENCES users(id)
+            ON DELETE CASCADE
 );

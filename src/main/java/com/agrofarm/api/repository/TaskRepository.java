@@ -10,10 +10,16 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    // Count tasks by status
     long countByStatus(TaskStatus status);
 
-    // Find tasks by status
     List<Task> findByStatus(TaskStatus status);
 
+    List<Task> findByAssigneeId(Long assigneeId);
+
+    List<Task> findByFieldId(Long fieldId);
+
+    List<Task> findByAssigneeIdAndStatus(
+            Long assigneeId,
+            TaskStatus status
+    );
 }
