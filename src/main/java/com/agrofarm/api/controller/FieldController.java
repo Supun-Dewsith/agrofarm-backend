@@ -19,11 +19,6 @@ public class FieldController {
 
     private final FieldService fieldService;
 
-
-    /**
-     * Create Field
-     * POST /api/v1/fields
-     */
     @PostMapping
     public ResponseEntity<FieldResponse> createField(
             @Valid @RequestBody FieldRequest request
@@ -37,11 +32,6 @@ public class FieldController {
                 .body(response);
     }
 
-
-    /**
-     * Get All Fields
-     * GET /api/v1/fields
-     */
     @GetMapping
     public ResponseEntity<List<FieldResponse>> getAllFields() {
 
@@ -50,11 +40,6 @@ public class FieldController {
         );
     }
 
-
-    /**
-     * Get Field By ID
-     * GET /api/v1/fields/{id}
-     */
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<FieldResponse> getFieldById(
             @PathVariable Long id
@@ -65,11 +50,6 @@ public class FieldController {
         );
     }
 
-
-    /**
-     * Get Fields By Farm
-     * GET /api/v1/fields/farm/{farmId}
-     */
     @GetMapping("/farm/{farmId:\\d+}")
     public ResponseEntity<List<FieldResponse>> getFieldsByFarm(
             @PathVariable Long farmId
@@ -80,11 +60,6 @@ public class FieldController {
         );
     }
 
-
-    /**
-     * Update Field
-     * PUT /api/v1/fields/{id}
-     */
     @PutMapping("/{id:\\d+}")
     public ResponseEntity<FieldResponse> updateField(
             @PathVariable Long id,
@@ -96,11 +71,6 @@ public class FieldController {
         );
     }
 
-
-    /**
-     * Delete Field
-     * DELETE /api/v1/fields/{id}
-     */
     @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<String> deleteField(
             @PathVariable Long id

@@ -16,6 +16,9 @@ public class FarmServiceImpl implements FarmService {
 
     private final FarmRepository farmRepository;
 
+    /* =========================================================
+       CREATE FARM
+    ========================================================= */
 
     @Override
     public FarmResponse createFarm(FarmRequest request) {
@@ -26,6 +29,7 @@ public class FarmServiceImpl implements FarmService {
                 .farmAddress(request.getFarmAddress())
                 .latitude(request.getLatitude())
                 .longtitude(request.getLongtitude())
+                .boundary(request.getBoundary())
                 .build();
 
         Farm savedFarm = farmRepository.save(farm);
@@ -33,6 +37,9 @@ public class FarmServiceImpl implements FarmService {
         return mapToResponse(savedFarm);
     }
 
+    /* =========================================================
+       GET ALL FARMS
+    ========================================================= */
 
     @Override
     public List<FarmResponse> getAllFarms() {
@@ -43,6 +50,9 @@ public class FarmServiceImpl implements FarmService {
                 .toList();
     }
 
+    /* =========================================================
+       GET FARM BY ID
+    ========================================================= */
 
     @Override
     public FarmResponse getFarmById(Long id) {
@@ -57,6 +67,9 @@ public class FarmServiceImpl implements FarmService {
         return mapToResponse(farm);
     }
 
+    /* =========================================================
+       GET FARMS BY OWNER
+    ========================================================= */
 
     @Override
     public List<FarmResponse> getFarmsByOwner(Long ownerId) {
@@ -67,6 +80,9 @@ public class FarmServiceImpl implements FarmService {
                 .toList();
     }
 
+    /* =========================================================
+       UPDATE FARM
+    ========================================================= */
 
     @Override
     public FarmResponse updateFarm(
@@ -86,12 +102,16 @@ public class FarmServiceImpl implements FarmService {
         farm.setFarmAddress(request.getFarmAddress());
         farm.setLatitude(request.getLatitude());
         farm.setLongtitude(request.getLongtitude());
+        farm.setBoundary(request.getBoundary());
 
         Farm updatedFarm = farmRepository.save(farm);
 
         return mapToResponse(updatedFarm);
     }
 
+    /* =========================================================
+       DELETE FARM
+    ========================================================= */
 
     @Override
     public void deleteFarm(Long id) {
@@ -107,6 +127,7 @@ public class FarmServiceImpl implements FarmService {
     }
 
 
+
     private FarmResponse mapToResponse(Farm farm) {
 
         return FarmResponse.builder()
@@ -116,6 +137,7 @@ public class FarmServiceImpl implements FarmService {
                 .farmAddress(farm.getFarmAddress())
                 .latitude(farm.getLatitude())
                 .longtitude(farm.getLongtitude())
+                .boundary(farm.getBoundary())
                 .build();
     }
 }

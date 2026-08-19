@@ -19,7 +19,6 @@ public class FarmController {
 
     private final FarmService farmService;
 
-
     @PostMapping
     public ResponseEntity<FarmResponse> createFarm(
             @Valid @RequestBody FarmRequest request
@@ -33,7 +32,6 @@ public class FarmController {
                 .body(response);
     }
 
-
     @GetMapping
     public ResponseEntity<List<FarmResponse>> getAllFarms() {
 
@@ -41,7 +39,6 @@ public class FarmController {
                 farmService.getAllFarms()
         );
     }
-
 
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<FarmResponse> getFarmById(
@@ -53,7 +50,6 @@ public class FarmController {
         );
     }
 
-
     @GetMapping("/owner/{ownerId:\\d+}")
     public ResponseEntity<List<FarmResponse>> getFarmsByOwner(
             @PathVariable Long ownerId
@@ -63,7 +59,6 @@ public class FarmController {
                 farmService.getFarmsByOwner(ownerId)
         );
     }
-
 
     @PutMapping("/{id:\\d+}")
     public ResponseEntity<FarmResponse> updateFarm(
@@ -75,7 +70,6 @@ public class FarmController {
                 farmService.updateFarm(id, request)
         );
     }
-
 
     @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<String> deleteFarm(

@@ -8,7 +8,11 @@ public record QrAttendanceResponse(
 
         String message,
 
-        LocalDateTime checkInTime
+        LocalDateTime checkInTime,
+
+        Double latitude,
+
+        Double longitude
 
 ) {
 }

@@ -27,9 +27,25 @@ public class Farm {
     @Column(name = "farm_address", nullable = false, length = 200)
     private String farmAddress;
 
-    @Column(nullable = false, precision = 10, scale = 7)
+    @Column(
+            name = "latitude",
+            nullable = false,
+            precision = 10,
+            scale = 7
+    )
     private BigDecimal latitude;
 
-    @Column(name = "longtitude", nullable = false, precision = 11, scale = 7)
+    @Column(
+            name = "longtitude",
+            nullable = false,
+            precision = 11,
+            scale = 7
+    )
     private BigDecimal longtitude;
+
+    @Column(
+            name = "boundary",
+            columnDefinition = "TEXT"
+    )
+    private String boundary;
 }

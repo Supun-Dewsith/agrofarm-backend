@@ -25,16 +25,40 @@ public class Field {
     @Column(name = "field_name", nullable = false, length = 100)
     private String fieldName;
 
-    @Column(name = "field_size", nullable = false, precision = 10, scale = 2)
+    @Column(
+            name = "field_size",
+            nullable = false,
+            precision = 10,
+            scale = 2
+    )
     private BigDecimal fieldSize;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "size_unit", nullable = false)
+    @Column(
+            name = "size_unit",
+            nullable = false
+    )
     private SizeUnit sizeUnit;
 
-    @Column(nullable = false, precision = 10, scale = 7)
+    @Column(
+            name = "latitude",
+            nullable = false,
+            precision = 10,
+            scale = 7
+    )
     private BigDecimal latitude;
 
-    @Column(name = "longtitude", nullable = false, precision = 11, scale = 7)
+    @Column(
+            name = "longtitude",
+            nullable = false,
+            precision = 11,
+            scale = 7
+    )
     private BigDecimal longtitude;
+
+    @Column(
+            name = "boundary",
+            columnDefinition = "TEXT"
+    )
+    private String boundary;
 }
