@@ -26,9 +26,14 @@ public class TaskResponse {
 
     private Long assigneeId;
 
+    private String assigneeName;
+
     private Long fieldId;
+
+    private String fieldName;
 
     private LocalDate dueDate;
 
     private LocalDateTime createdAt;
+
 }

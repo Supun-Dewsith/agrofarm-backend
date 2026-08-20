@@ -22,4 +22,6 @@ public class FarmResponse {
     private BigDecimal latitude;
 
     private BigDecimal longtitude;
+
+    private String boundary;
 }

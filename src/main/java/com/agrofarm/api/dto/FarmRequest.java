@@ -13,18 +13,21 @@ import java.math.BigDecimal;
 @Builder
 public class FarmRequest {
 
-    @NotNull
-    private Long ownerId;
+        @NotNull
+        private Long ownerId;
 
-    @NotBlank
-    private String farmName;
+        @NotBlank
+        private String farmName;
 
-    @NotBlank
-    private String farmAddress;
+        @NotBlank
+        private String farmAddress;
 
-    @NotNull
-    private BigDecimal latitude;
+        @NotNull
+        private BigDecimal latitude;
 
-    @NotNull
-    private BigDecimal longtitude;
+        @NotNull
+        private BigDecimal longtitude;
+
+        @NotBlank
+        private String boundary;
 }

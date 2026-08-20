@@ -25,4 +25,6 @@ public class FieldResponse {
     private BigDecimal latitude;
 
     private BigDecimal longtitude;
+
+    private String boundary;
 }
