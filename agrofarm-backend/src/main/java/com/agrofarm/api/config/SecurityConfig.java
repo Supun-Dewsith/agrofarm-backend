@@ -71,6 +71,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
 
                         .requestMatchers("/api/crops/**").hasAnyAuthority("ADMIN","CROPS")
                         .requestMatchers("/api/inventory/**").hasAuthority("INVENTORY")
@@ -85,8 +86,6 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
 
-
-                        // ----------- http config for weather controller. -------------
                         .requestMatchers("/api/weather/**").permitAll()
                         .anyRequest().authenticated()
                 )

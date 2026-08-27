@@ -1,0 +1,63 @@
+name: Deploy AgroFarm Stack via Docker Compose
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Copy Files to Azure VM via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          source: "."
+          target: "/home/azureuser/agro-farming-manager"
+          rm: false
+
+      - name: Generate .env File and Restart Containers via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
+          ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          envs: DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_EXPIRATION,ADMIN_USERNAME,ADMIN_EMAIL,ADMIN_PASSWORD,GEMINI_API_KEY
+          script: |
+            cd /home/azureuser/agro-farming-manager
+            
+            # Write secrets safely into .env
+            cat <<EOF > .env
+            DB_URL="${DB_URL}"
+            DB_USERNAME="${DB_USERNAME}"
+            DB_PASSWORD="${DB_PASSWORD}"
+            JWT_SECRET="${JWT_SECRET}"
+            JWT_EXPIRATION="${JWT_EXPIRATION}"
+            ADMIN_USERNAME="${ADMIN_USERNAME}"
+            ADMIN_EMAIL="${ADMIN_EMAIL}"
+            ADMIN_PASSWORD="${ADMIN_PASSWORD}"
+            GEMINI_API_KEY="${GEMINI_API_KEY}"
+            EOF
+              
+            # Restart containers with fresh environment
+            docker compose down
+            docker compose up --build -d
+            
+            # Prune dangling images
+            docker image prune -f
