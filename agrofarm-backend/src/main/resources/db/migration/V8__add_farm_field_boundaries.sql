@@ -1,0 +1,5 @@
+ALTER TABLE farms
+    ADD COLUMN boundary TEXT NULL;
+
+ALTER TABLE fields
+    ADD COLUMN boundary TEXT NULL;

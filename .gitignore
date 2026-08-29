@@ -1,0 +1,77 @@
+# ==========================================
+# Environment & Sensitive Configuration
+# ==========================================
+.env
+*.env
+!.env.example
+
+# Do NOT commit local active Spring properties with secrets if used
+# **/src/main/resources/application-local.yml
+# **/src/main/resources/application-local.properties
+
+# ==========================================
+# Java / Maven / Spring Boot (agrofarm-backend)
+# ==========================================
+target/
+**/target/
+build/
+**/build/
+HELP.md
+
+# Maven wrapper binary
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ==========================================
+# Python Microservice
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ==========================================
+# IDEs & Editors
+# ==========================================
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# VS Code
+.vscode/
+
+# Eclipse / STS / NetBeans
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# ==========================================
+# Operating System & Logs
+# ==========================================
+.DS_Store
+Thumbs.db
+*.log
+logs/
