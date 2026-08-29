@@ -32,7 +32,7 @@ services:
       # Python Service Connection
       - PYTHON_SERVICE_URL=http://python-microservice:5000
       # Pass JVM options inside the Docker container
-      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx320m -XX:+UseSerialGC -XX:TieredStopAtLevel=1
     deploy:
       resources:
         limits:
