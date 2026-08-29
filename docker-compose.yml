@@ -3,6 +3,7 @@ services:
   python-microservice:
     build: ./python-microservice
     container_name: python-microservice
+    restart: unless-stopped
     networks:
       - backend-net
     environment:
@@ -15,6 +16,7 @@ services:
   agrofarm-backend:
     build: ./agrofarm-backend
     container_name: agrofarm-backend
+    restart: unless-stopped
     depends_on:
       - python-microservice
     environment:
