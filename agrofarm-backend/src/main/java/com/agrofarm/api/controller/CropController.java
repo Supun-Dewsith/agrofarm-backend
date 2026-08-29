@@ -32,6 +32,12 @@ public class CropController {
 
     }
 
+    @PostMapping("/fields")
+    public void getFields(@RequestBody Long id){
+
+        
+    }
+
 
 
 
