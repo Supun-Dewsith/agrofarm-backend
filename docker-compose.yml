@@ -27,6 +27,8 @@ services:
       # JWT
       - APP_JWT_SECRET=${JWT_SECRET}
       - APP_JWT_EXPIRATION=${JWT_EXPIRATION}
+      # CORS Allowed Origins
+      - APP_CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
       # Admin Account
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
