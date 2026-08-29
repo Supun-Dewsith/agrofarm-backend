@@ -56,6 +56,10 @@ services:
     volumes:
       - ./nginx/app.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
+    deploy:
+      resources:
+        limits:
+          memory: 32M
     networks:
       - backend-net
     depends_on:
