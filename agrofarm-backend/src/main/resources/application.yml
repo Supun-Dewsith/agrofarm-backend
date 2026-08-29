@@ -1,9 +1,9 @@
 spring:
   datasource:
     # Use host.docker.internal when running inside Docker to connect to MySQL on the host machine
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://host.docker.internal:3306/agrofarm_db?createDatabaseIfNotExist=true}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:root}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
   flyway:
     enabled: true
@@ -11,11 +11,11 @@ spring:
 
 app:
   jwt:
-    secret: ${APP_JWT_SECRET:default_jwt_secret_key_change_me_in_env_file_123456}
-    expiration: ${APP_JWT_EXPIRATION:20000000}
+    secret: ${APP_JWT_SECRET}
+    expiration: ${APP_JWT_EXPIRATION}
 
   security:
     initial-admin:
-      username: ${ADMIN_USERNAME:admin}
-      email: ${ADMIN_EMAIL:admin@agrofarm.com}
-      password: ${ADMIN_PASSWORD:admin123}
+      username: ${ADMIN_USERNAME}
+      email: ${ADMIN_EMAIL}
+      password: ${ADMIN_PASSWORD}
