@@ -34,7 +34,7 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       # Python Service Connection
-      - PYTHON_SERVICE_URL=http://python-microservice:8000
+      - PYTHON_MICROSERVICE_URL=http://python-microservice:8000
       - PYTHON_MICROSERVICE_TIMEOUT_SECONDS=10
       # Pass JVM options inside the Docker container
       - JAVA_TOOL_OPTIONS=-Xms128m -Xmx320m -XX:+UseSerialGC -XX:TieredStopAtLevel=1
