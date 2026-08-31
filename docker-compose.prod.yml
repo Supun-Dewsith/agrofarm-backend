@@ -1,0 +1,76 @@
+
+services:
+  python-microservice:
+    build: ./python-microservice
+    container_name: python-microservice
+    restart: unless-stopped
+    networks:
+      - backend-net
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+
+  agrofarm-backend:
+    build: ./agrofarm-backend
+    container_name: agrofarm-backend
+    restart: unless-stopped
+    depends_on:
+      - python-microservice
+    environment:
+      # Database
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      # JWT
+      - APP_JWT_SECRET=${JWT_SECRET}
+      - APP_JWT_EXPIRATION=${JWT_EXPIRATION}
+      # CORS Allowed Origins
+      - APP_CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+      # Admin Account
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      # Python Service Connection
+      - PYTHON_MICROSERVICE_URL=http://python-microservice:8000
+      - PYTHON_MICROSERVICE_TIMEOUT_SECONDS=10
+      # Pass JVM options inside the Docker container
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx320m -XX:+UseSerialGC -XX:TieredStopAtLevel=1
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - backend-net
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/app.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+    networks:
+      - backend-net
+    depends_on:
+      agrofarm-backend:
+        condition: service_healthy
+
+networks:
+  backend-net:
+    driver: bridge
