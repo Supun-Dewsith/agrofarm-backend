@@ -54,10 +54,10 @@ jobs:
             ADMIN_PASSWORD="${ADMIN_PASSWORD}"
             GEMINI_API_KEY="${GEMINI_API_KEY}"
             EOF
-              
-            # Restart containers with fresh environment
-            docker compose down
-            docker compose up --build -d
+            
+            # Restart containers using the production compose file
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up --build -d
             
             # Prune dangling images
             docker image prune -f
