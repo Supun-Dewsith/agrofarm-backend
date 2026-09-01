@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface CropRepository {
     public List<FarmIDs> findFarmIdsFromUserID(Long ID);
+    public List<Fields> findFieldsFromFarmID(Long ID);
 }

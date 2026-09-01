@@ -34,4 +34,9 @@ public class CropServiceImpl {
     }
 
 
+    public List<Fields> getFieldDetails(Long id){
+        return cropRepository.findFieldsFromFarmID(id);
+    }
+
+
 }

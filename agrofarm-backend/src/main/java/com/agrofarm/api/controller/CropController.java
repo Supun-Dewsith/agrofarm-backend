@@ -33,9 +33,12 @@ public class CropController {
     }
 
     @PostMapping("/fields")
-    public void getFields(@RequestBody Long id){
+    public List<Fields> getFields(@RequestBody Long id){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
 
-        
+        return cropService.getFieldDetails(id);
+
     }
 
 

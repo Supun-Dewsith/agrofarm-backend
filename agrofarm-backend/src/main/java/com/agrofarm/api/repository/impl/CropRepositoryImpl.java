@@ -1,6 +1,7 @@
 package com.agrofarm.api.repository.impl;
 
 import com.agrofarm.api.dto.FarmIDs;
+import com.agrofarm.api.dto.Fields;
 import com.agrofarm.api.repository.CropRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,5 +38,28 @@ public class CropRepositoryImpl implements CropRepository {
             // Return null or handle the case where no farm is found for this user
             return null;
         }
+    }
+
+    @Override
+    public List<Fields> findFieldsFromFarmID(Long ID) {
+
+        String sql = "SELECT id, field_name, field_size, size_unit WHERE farm_id = ?";
+        try {
+            return template.query(sql, (rs, rowNum) -> {
+
+                Fields fields = new Fields();
+
+                fields.setId(rs.getLong("id"));
+                fields.setField_name(rs.getString("field_name"));
+                fields.setField_size(rs.getLong("field_size"));
+                fields.setSize_unit(rs.getLong("size_unit"));
+
+                return fields;
+            },ID);
+        } catch (EmptyResultDataAccessException e) {
+            // Return null or handle the case where no farm is found for this user
+            return null;
+        }
+
     }
 }
