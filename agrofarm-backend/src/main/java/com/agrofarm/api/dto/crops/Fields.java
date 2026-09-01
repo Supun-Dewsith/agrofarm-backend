@@ -1,4 +1,4 @@
-package com.agrofarm.api.dto;
+package com.agrofarm.api.dto.crops;
 
 import lombok.Data;
 
@@ -9,6 +9,6 @@ public class Fields {
 
     private Long id;
     private String field_name;
-    private decimal field_size;
+    private double field_size;
     private String size_unit;
 }

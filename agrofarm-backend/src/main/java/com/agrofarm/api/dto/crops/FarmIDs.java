@@ -1,4 +1,4 @@
-package com.agrofarm.api.dto;
+package com.agrofarm.api.dto.crops;
 
 import lombok.Data;
 

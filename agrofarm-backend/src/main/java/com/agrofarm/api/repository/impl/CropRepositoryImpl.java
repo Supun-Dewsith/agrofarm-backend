@@ -1,7 +1,7 @@
 package com.agrofarm.api.repository.impl;
 
-import com.agrofarm.api.dto.FarmIDs;
-import com.agrofarm.api.dto.Fields;
+import com.agrofarm.api.dto.crops.FarmIDs;
+import com.agrofarm.api.dto.crops.Fields;
 import com.agrofarm.api.repository.CropRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,7 +52,7 @@ public class CropRepositoryImpl implements CropRepository {
                 fields.setId(rs.getLong("id"));
                 fields.setField_name(rs.getString("field_name"));
                 fields.setField_size(rs.getLong("field_size"));
-                fields.setSize_unit(rs.getLong("size_unit"));
+                fields.setSize_unit(rs.getString("size_unit"));
 
                 return fields;
             },ID);

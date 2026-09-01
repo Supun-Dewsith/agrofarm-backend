@@ -1,7 +1,7 @@
 package com.agrofarm.api.controller;
 
-import com.agrofarm.api.dto.CurrentWeather;
-import com.agrofarm.api.dto.WeatherResponse;
+import com.agrofarm.api.dto.weather.CurrentWeather;
+import com.agrofarm.api.dto.weather.WeatherResponse;
 import com.agrofarm.api.service.WeatherService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
