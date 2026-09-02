@@ -1,7 +1,7 @@
 package com.agrofarm.api.service;
 
-import com.agrofarm.api.dto.CurrentWeather;
-import com.agrofarm.api.dto.WeatherResponse;
+import com.agrofarm.api.dto.weather.CurrentWeather;
+import com.agrofarm.api.dto.weather.WeatherResponse;
 import com.agrofarm.api.entity.FarmLocation;
 import com.agrofarm.api.exception.LocationNotFoundException;
 import com.agrofarm.api.repository.WeatherRepository;
