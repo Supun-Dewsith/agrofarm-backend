@@ -44,8 +44,10 @@ public class CropController {
 
 
 
-    @PostMapping("/crops")
-    public void getCropDetails(@RequestBody Long id){
+    @PostMapping("/new")
+    public String getCropDetails(@RequestBody Long id){
+        String respomse = "done";
+        return respomse;
 
     }
 }
