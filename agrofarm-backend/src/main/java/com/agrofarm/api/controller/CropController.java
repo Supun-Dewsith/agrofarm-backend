@@ -3,6 +3,7 @@ package com.agrofarm.api.controller;
 
 import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
+import com.agrofarm.api.dto.crops.NewCropRequest;
 import com.agrofarm.api.service.impl.CropServiceImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,9 +46,8 @@ public class CropController {
 
 
     @PostMapping("/new")
-    public String getCropDetails(@RequestBody Long id){
-        String respomse = "done";
-        return respomse;
+    public void getCropDetails(@RequestBody NewCropRequest request){
+        System.out.println(request);
 
     }
 }
