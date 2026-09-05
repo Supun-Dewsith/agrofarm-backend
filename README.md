@@ -4,6 +4,7 @@
 
 ## Prerequisites
 - [Docker Desktop](https://docs.docker.com/get-docker/) (includes Docker Compose)
+- [Java 21 JDK](https://adoptium.net/temurin/releases/?version=21)
 - Git
 
 ---
@@ -31,18 +32,53 @@ cp .env.example .env
 
 ## Local Development (HTTP)
 
-Runs the entire stack locally over HTTP on port `80` using `docker-compose.yml` and `nginx/app.local.conf`:
+Runs the entire stack locally over HTTP on port `80` using `docker-compose.yml` and `nginx/app.local.conf`.
+
+### 1. Initial Build & First Run
+
+Because the backend runs directly from the locally packaged JAR via a volume mount for faster development, package the Spring Boot application once before starting Docker:
 
 ```bash
-# Start all services with fresh builds
-docker compose up -d --build
+# Package the Spring Boot JAR (Windows CMD / PowerShell)
+cd agrofarm-backend
+.\mvnw.cmd clean package -DskipTests
+cd ..
 
-# Stream logs
+# Alternatively on macOS / Linux / WSL:
+cd agrofarm-backend && ./mvnw clean package -DskipTests && cd ..
+
+# Start all services
+docker compose up -d
+
+```
+### 2. Fast Development Workflow (Applying Code Changes)
+
+When you make changes to Java code in `agrofarm-backend`, you do not need to rebuild Docker images. Simply repackage the JAR locally and restart the container:
+
+```bash
+# Step 1: Repackage the backend (3–5 seconds)
+# Windows CMD / PowerShell:
+cd agrofarm-backend
+.\mvnw.cmd package -DskipTests
+cd ..
+
+# Alternatively on macOS / Linux / WSL:
+cd agrofarm-backend && ./mvnw package -DskipTests && cd ..
+
+# Step 2: Restart the container to apply changes (~1 second)
+docker compose restart agrofarm-backend
+```
+### 3. Common Docker Commands
+
+```bash
+# Stream all container logs
 docker compose logs -f
+
+# Stream logs for the backend only
+docker compose logs -f agrofarm-backend
 
 # Stop all services
 docker compose down
-
 ```
 
 * **Backend API & Health Check:** `http://localhost/actuator/health`
