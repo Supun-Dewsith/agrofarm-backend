@@ -43,7 +43,7 @@ public class CropRepositoryImpl implements CropRepository {
     @Override
     public List<Fields> findFieldsFromFarmID(Long ID) {
 
-        String sql = "SELECT id, field_name, field_size, size_unit WHERE farm_id = ?";
+        String sql = "SELECT id, field_name, field_size, size_unit FROM fields WHERE farm_id = ?";
         try {
             return template.query(sql, (rs, rowNum) -> {
 
