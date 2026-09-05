@@ -2,6 +2,7 @@ package com.agrofarm.api.repository;
 
 import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
+import com.agrofarm.api.dto.crops.NewCropRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,4 +11,5 @@ import java.util.List;
 public interface CropRepository {
     public List<FarmIDs> findFarmIdsFromUserID(Long ID);
     public List<Fields> findFieldsFromFarmID(Long ID);
+    void addNewCrop(NewCropRequest request);
 }

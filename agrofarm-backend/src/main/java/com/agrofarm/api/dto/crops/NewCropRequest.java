@@ -1,6 +1,8 @@
 package com.agrofarm.api.dto.crops;
 
 import lombok.Data;
+import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 import java.util.Date;
 
@@ -15,6 +17,6 @@ public class NewCropRequest {
     String growthStage;
     Number progress;
     String status;
-    Date plantDate;
-    Date harvestDate;
+    LocalDateTime plantDate;
+    LocalDateTime harvestDate;
 }
