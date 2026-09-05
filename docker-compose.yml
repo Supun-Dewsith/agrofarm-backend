@@ -13,11 +13,15 @@ services:
           memory: 96M
 
   agrofarm-backend:
-    build: ./agrofarm-backend
+    image: eclipse-temurin:21-jre
     container_name: agrofarm-backend
     restart: unless-stopped
     depends_on:
       - python-microservice
+    volumes:
+      # Mount host target folder into container
+      - ./agrofarm-backend/target:/app/target
+    entrypoint: ["sh", "-c", "java -jar /app/target/*.jar"]
     environment:
       # Database
       - SPRING_DATASOURCE_URL=${DB_URL}
