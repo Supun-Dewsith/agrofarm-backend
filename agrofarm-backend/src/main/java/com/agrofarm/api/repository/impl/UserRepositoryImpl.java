@@ -41,7 +41,8 @@ public class UserRepositoryImpl implements UserRepository {
                             rs.getString("password"),
                             rs.getString("phone_number"),
                             Role.valueOf(rs.getString("role")),
-                            rs.getBoolean("enabled")
+                            rs.getBoolean("enabled"),
+                            rs.getString("image_url")
                     ),username);
             populatePermissions(user);
             return Optional.ofNullable(user);
@@ -52,7 +53,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public UserEntity save(UserEntity entity) {
-        String sql = "INSERT INTO users (user_name, created_at, email, password, phone_number, role, enabled) VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO users (user_name, created_at, email, password, phone_number, role, enabled, image_url) VALUES (?,?,?,?,?,?,?,?)";
+
         template.update(sql,
                 entity.getUsername(),
                 entity.getCreatedAt(),
@@ -60,7 +62,10 @@ public class UserRepositoryImpl implements UserRepository {
                 entity.getPassword(),
                 entity.getPhoneNumber(),
                 entity.getRole().name(),
-                entity.getEnabled());
+                entity.getEnabled(),
+                entity.getImageUrl()
+        );
+
         UserEntity savedUser = findByUsername(entity.getUsername()).orElse(null);
 
         if (savedUser != null && entity.getPermissions() != null && !entity.getPermissions().isEmpty()) {
@@ -91,6 +96,7 @@ public class UserRepositoryImpl implements UserRepository {
                 entity.setPhoneNumber(rs.getString("phone_number"));
                 entity.setRole(Role.valueOf(rs.getString("role")));
                 entity.setEnabled(rs.getBoolean("enabled"));
+                entity.setImageUrl(rs.getString("image_url"));
                 return entity;
             }, id);
             populatePermissions(user);
