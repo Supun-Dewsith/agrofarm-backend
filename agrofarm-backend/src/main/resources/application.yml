@@ -25,3 +25,9 @@ python:
   microservice:
     url: ${PYTHON_MICROSERVICE_URL}
     connect-timeout-seconds: ${PYTHON_MICROSERVICE_TIMEOUT_SECONDS}
+
+supabase:
+  url: ${SUPABASE_URL}
+  service-key: ${SUPABASE_SERVICE_KEY}
+  bucket:
+    name: ${SUPABASE_BUCKET_NAME:avatars}
