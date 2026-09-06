@@ -23,10 +23,11 @@ public class UserEntity {
     private String phoneNumber;
     private Role role;
     private Boolean enabled;
+    private String imageUrl;
     private Set<String> permissions = new HashSet<>();
 
     public UserEntity(Long id, String username, LocalDateTime createdAt, String email,
-                      String password, String phoneNumber, Role role, Boolean enabled) {
+                      String password, String phoneNumber, Role role, Boolean enabled, String imageUrl) {
         this.id = id;
         this.username = username;
         this.createdAt = createdAt;
@@ -35,6 +36,7 @@ public class UserEntity {
         this.phoneNumber = phoneNumber;
         this.role = role;
         this.enabled = enabled;
+        this.imageUrl = imageUrl;
         this.permissions = new HashSet<>();
     }
 }

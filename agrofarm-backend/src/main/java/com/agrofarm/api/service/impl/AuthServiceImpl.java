@@ -10,6 +10,7 @@ import com.agrofarm.api.repository.RefreshTokenRepository;
 import com.agrofarm.api.repository.UserRepository;
 import com.agrofarm.api.service.AuthService;
 import com.agrofarm.api.service.CustomUserDetailsService;
+import com.agrofarm.api.service.StorageService;
 import com.agrofarm.api.service.TokenService;
 import com.agrofarm.api.util.Role;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.HashSet;
 
 @Service
@@ -30,8 +33,9 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final StorageService storageService;
 
-    public AuthResponse register(RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request, MultipartFile file) {
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already taken");
@@ -39,12 +43,18 @@ public class AuthServiceImpl implements AuthService {
 
         Role role = (request.getRole() != null) ? request.getRole() : Role.FARMER;
 
+        String imageUrl = null;
+        if (file != null && !file.isEmpty()) {
+            imageUrl = storageService.uploadFile(file);
+        }
+
         UserEntity entity = new UserEntity();
         entity.setUsername(request.getUsername());
         entity.setEmail(request.getEmail());
         entity.setPassword(passwordEncoder.encode(request.getPassword()));
         entity.setRole(role);
         entity.setEnabled(true);
+        entity.setImageUrl(imageUrl);
 
         if (request.getPermissions() != null) {
             entity.setPermissions(new HashSet<>(request.getPermissions()));
@@ -60,7 +70,14 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = tokenService.generateAccessToken(userDetails);
         String refreshToken = tokenService.createAndSaveRefreshToken(savedUser.getId());
 
-        return new AuthResponse(accessToken, refreshToken, savedUser.getUsername(), role, savedUser.getPermissions());
+        return new AuthResponse(
+                accessToken,
+                refreshToken,
+                savedUser.getUsername(),
+                role,
+                savedUser.getPermissions(),
+                savedUser.getImageUrl()
+        );
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -87,7 +104,7 @@ public class AuthServiceImpl implements AuthService {
                         .orElse("FARMER")
         );
 
-        return new AuthResponse(accessToken, refreshToken, userDetails.getUsername(),role ,entity.getPermissions());
+        return new AuthResponse(accessToken, refreshToken, userDetails.getUsername(),role ,entity.getPermissions(),entity.getImageUrl());
     }
 
     public AuthResponse refreshToken(TokenRefreshRequest request){
@@ -106,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
                             .map(GrantedAuthority::getAuthority)
                             .findFirst().orElse("FARMER"));
 
-                    return new AuthResponse(newAccessToken, requestRefreshToken, user.getUsername(), role ,user.getPermissions());
+                    return new AuthResponse(newAccessToken, requestRefreshToken, user.getUsername(), role ,user.getPermissions(),user.getImageUrl());
                 })
                 .orElseThrow(() -> new TokenRefreshException("Refresh token is invalid or not found!"));
     }
