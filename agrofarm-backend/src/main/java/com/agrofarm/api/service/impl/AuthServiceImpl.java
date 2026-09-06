@@ -54,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
         entity.setPassword(passwordEncoder.encode(request.getPassword()));
         entity.setRole(role);
         entity.setEnabled(true);
+        entity.setImageUrl(imageUrl);
 
         if (request.getPermissions() != null) {
             entity.setPermissions(new HashSet<>(request.getPermissions()));
