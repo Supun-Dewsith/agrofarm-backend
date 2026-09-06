@@ -2,6 +2,7 @@ package com.agrofarm.api.service.impl;
 
 import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
+import com.agrofarm.api.dto.crops.NewCropRequest;
 import com.agrofarm.api.entity.UserEntity;
 import com.agrofarm.api.repository.CropRepository;
 import com.agrofarm.api.repository.UserRepository;
@@ -39,7 +40,15 @@ public class CropServiceImpl implements CropService {
 
     @Override
     public List<Fields> getFieldDetails(Long id){
+
         return cropRepository.findFieldsFromFarmID(id);
+    }
+
+
+
+    @Override
+    public void addNewCrop(NewCropRequest request){
+        cropRepository.addNewCrop(request);
     }
 
 
