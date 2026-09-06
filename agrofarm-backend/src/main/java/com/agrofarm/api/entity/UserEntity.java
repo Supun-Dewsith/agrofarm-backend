@@ -23,6 +23,7 @@ public class UserEntity {
     private String phoneNumber;
     private Role role;
     private Boolean enabled;
+    private String imageUrl;
     private Set<String> permissions = new HashSet<>();
 
     public UserEntity(Long id, String username, LocalDateTime createdAt, String email,

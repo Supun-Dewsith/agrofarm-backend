@@ -15,12 +15,14 @@ public class AuthResponse {
     private String username;
     private Role role;
     private Set<String> permissions = new HashSet<>();
+    private String imageUrl;
 
-    public AuthResponse(String accessToken, String refreshToken, String username, Role role, Set<String> permissions) {
+    public AuthResponse(String accessToken, String refreshToken, String username, Role role, Set<String> permissions, String imageUrl) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.username = username;
         this.role = role;
         this.permissions = permissions != null ? permissions : new HashSet<>();
+        this.imageUrl = imageUrl;
     }
 }
