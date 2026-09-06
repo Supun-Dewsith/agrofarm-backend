@@ -2,7 +2,6 @@ package com.agrofarm.api.repository.impl;
 
 import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
-import com.agrofarm.api.dto.crops.NewCropRequest;
 import com.agrofarm.api.repository.CropRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -61,29 +60,6 @@ public class CropRepositoryImpl implements CropRepository {
             // Return null or handle the case where no farm is found for this user
             return null;
         }
-
-    }
-
-
-    @Override
-    public void addNewCrop(NewCropRequest request){
-
-
-        String sql = "INSERT INTO crops (crop_name, variety, farm_id, field_id, growth_stage, progress, status, plant_date, harvest_date) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        template.update(
-                sql,
-                request.getCropName(),
-                request.getVariety(),
-                request.getFarmId(),
-                request.getFieldId(),
-                request.getGrowthStage(),
-                request.getProgress(),
-                request.getStatus(),
-                request.getPlantDate(),
-                request.getHarvestDate()
-        );
 
     }
 }
