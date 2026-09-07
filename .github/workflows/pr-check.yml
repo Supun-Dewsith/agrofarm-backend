@@ -1,0 +1,43 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ "dev" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for Protected Configuration Changes
+        run: |
+          # Get list of changed files compared to base branch
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "Files modified in this PR:"
+          echo "$CHANGED_FILES"
+
+          # Define regex pattern of protected files/folders
+          PROTECTED_PATTERN="^(docker-compose.*|\.github/workflows/.*|nginx/.*|\.env\.example|.*application(-[a-zA-Z0-9]+)?\.(yml|yaml|properties)|.*/pom\.xml)$"
+
+          # Check if any modified file matches protected files
+          BLOCKED=$(echo "$CHANGED_FILES" | grep -E "$PROTECTED_PATTERN" || true)
+
+          if [ -n "$BLOCKED" ]; then
+            echo "::error::Modifications to configuration files are restricted!"
+            echo "Blocked files:"
+            echo "$BLOCKED"
+            exit 1
+          fi
+
+          echo "No protected configuration files were modified."
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose -f docker-compose.prod.yml config
