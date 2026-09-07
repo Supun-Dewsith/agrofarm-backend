@@ -5,9 +5,13 @@ import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
 import com.agrofarm.api.dto.crops.NewCropRequest;
 import com.agrofarm.api.service.impl.CropServiceImpl;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -16,10 +20,12 @@ import java.util.List;
 public class CropController {
 
     private final CropServiceImpl cropService;
+    private final ObjectMapper objectMapper;
 
-    public CropController(CropServiceImpl cropService){
+    public CropController(CropServiceImpl cropService, ObjectMapper objectMapper){
 
         this.cropService = cropService;
+        this.objectMapper = objectMapper;
     }
 
 
@@ -45,9 +51,34 @@ public class CropController {
 
 
 
-    @PostMapping("/new")
-    public void getCropDetails(@RequestBody NewCropRequest request){
-        System.out.println(request);
+    @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> getCropDetails(
+            @RequestPart("crop") String cropJson,
+            @RequestPart(
+                    value = "image",
+                    required = false
+            ) MultipartFile image
+    )throws Exception {
+
+        // Convert JSON String → DTO
+        NewCropRequest cropDTO =
+                objectMapper.readValue(
+                        cropJson,
+                        NewCropRequest.class
+                );
+        if (image != null) {
+            System.out.println(
+                    "Image name: " +
+                            image.getOriginalFilename()
+            );
+
+        }
+
+        return ResponseEntity.ok("Crop received successfully");
+
+
+
+
 
     }
 }
