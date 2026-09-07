@@ -1,0 +1,5 @@
+/.github/workflows/           @Supun-Dewsith
+/docker-compose*.yml          @Supun-Dewsith
+/nginx/                       @Supun-Dewsith
+**/application*.yml           @Supun-Dewsith
+**/pom.xml                    @Supun-Dewsith
