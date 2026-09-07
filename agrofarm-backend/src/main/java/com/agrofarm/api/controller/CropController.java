@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
@@ -20,9 +20,9 @@ import java.util.List;
 public class CropController {
 
     private final CropServiceImpl cropService;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
 
-    public CropController(CropServiceImpl cropService, ObjectMapper objectMapper){
+    public CropController(CropServiceImpl cropService, JsonMapper objectMapper){
 
         this.cropService = cropService;
         this.objectMapper = objectMapper;
