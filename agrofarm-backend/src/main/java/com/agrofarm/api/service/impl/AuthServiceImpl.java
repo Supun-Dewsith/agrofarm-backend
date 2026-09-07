@@ -8,6 +8,7 @@ import com.agrofarm.api.entity.UserEntity;
 import com.agrofarm.api.exception.TokenRefreshException;
 import com.agrofarm.api.repository.RefreshTokenRepository;
 import com.agrofarm.api.repository.UserRepository;
+import com.agrofarm.api.security.AuthenticatedUser;
 import com.agrofarm.api.service.AuthService;
 import com.agrofarm.api.service.CustomUserDetailsService;
 import com.agrofarm.api.service.StorageService;
@@ -16,6 +17,7 @@ import com.agrofarm.api.util.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -82,20 +84,17 @@ public class AuthServiceImpl implements AuthService {
 
     public AuthResponse login(LoginRequest request) {
 
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
                 )
         );
 
-        UserEntity entity = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+        AuthenticatedUser userDetails = (AuthenticatedUser) authentication.getPrincipal();
 
         String accessToken = tokenService.generateAccessToken(userDetails);
-        String refreshToken = tokenService.createAndSaveRefreshToken(entity.getId());
+        String refreshToken = tokenService.createAndSaveRefreshToken(userDetails.getId());
 
         Role role = Role.valueOf(
                 userDetails.getAuthorities().stream()
@@ -104,7 +103,14 @@ public class AuthServiceImpl implements AuthService {
                         .orElse("FARMER")
         );
 
-        return new AuthResponse(accessToken, refreshToken, userDetails.getUsername(),role ,entity.getPermissions(),entity.getImageUrl());
+        return new AuthResponse(
+                accessToken,
+                refreshToken,
+                userDetails.getUsername(),
+                role,
+                userDetails.getPermissions(),
+                userDetails.getImageUrl()
+        );
     }
 
     public AuthResponse refreshToken(TokenRefreshRequest request){
