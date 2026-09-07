@@ -52,6 +52,31 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<UserEntity> findByUsernameOrEmail(String identifier) {
+        try {
+            String sql = "SELECT * FROM users WHERE user_name = ? OR email = ?";
+            UserEntity user = template.queryForObject(sql,
+                    (rs, rowNum) -> new UserEntity(
+                            rs.getLong("id"),
+                            rs.getString("user_name"),
+                            rs.getObject("created_at", LocalDateTime.class),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            rs.getString("phone_number"),
+                            Role.valueOf(rs.getString("role")),
+                            rs.getBoolean("enabled"),
+                            rs.getString("image_url")
+                    ),
+                    identifier, identifier
+            );
+            populatePermissions(user);
+            return Optional.ofNullable(user);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public UserEntity save(UserEntity entity) {
         String sql = "INSERT INTO users (user_name, created_at, email, password, phone_number, role, enabled, image_url) VALUES (?,?,?,?,?,?,?,?)";
 
