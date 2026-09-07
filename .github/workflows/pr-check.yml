@@ -19,25 +19,28 @@ jobs:
 
       - name: Check for Protected Configuration Changes
         run: |
-          # Get list of changed files compared to base branch
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
-          echo "Files modified in this PR:"
-          echo "$CHANGED_FILES"
+          if [ "${{ github.actor }}" = "Supun-Dewsith" ]; then
+            echo "PR author is repository lead (${{ github.actor }}). Skipping config lock check."
+          else
+            # Get list of changed files compared to base branch
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+            echo "Files modified in this PR:"
+            echo "$CHANGED_FILES"
 
-          # Define regex pattern of protected files/folders
-          PROTECTED_PATTERN="^(docker-compose.*|\.github/workflows/.*|nginx/.*|\.env\.example|.*application(-[a-zA-Z0-9]+)?\.(yml|yaml|properties)|.*/pom\.xml)$"
+            # Define regex pattern of protected files/folders
+            PROTECTED_PATTERN="^(docker-compose.*|\.github/workflows/.*|nginx/.*|\.env\.example|.*application(-[a-zA-Z0-9]+)?\.(yml|yaml|properties)|.*/pom\.xml)$"
 
-          # Check if any modified file matches protected files
-          BLOCKED=$(echo "$CHANGED_FILES" | grep -E "$PROTECTED_PATTERN" || true)
+            BLOCKED=$(echo "$CHANGED_FILES" | grep -E "$PROTECTED_PATTERN" || true)
 
-          if [ -n "$BLOCKED" ]; then
-            echo "::error::Modifications to configuration files are restricted!"
-            echo "Blocked files:"
-            echo "$BLOCKED"
-            exit 1
+            if [ -n "$BLOCKED" ]; then
+              echo "::error::Modifications to configuration files are restricted!"
+              echo "Blocked files:"
+              echo "$BLOCKED"
+              exit 1
+            fi
+
+            echo "No protected configuration files were modified."
           fi
-
-          echo "No protected configuration files were modified."
 
       - name: Validate Docker Compose Configuration
         run: docker compose -f docker-compose.prod.yml config
