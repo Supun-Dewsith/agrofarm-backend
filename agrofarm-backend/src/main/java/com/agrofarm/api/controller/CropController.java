@@ -74,6 +74,9 @@ public class CropController {
 
         }
 
+        Long cropId = cropService.insertCropData(cropDTO);
+        cropService.insertImage(image,cropId);
+
         return ResponseEntity.ok("Crop received successfully");
 
 
