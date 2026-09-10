@@ -1,6 +1,7 @@
 package com.agrofarm.api.controller;
 
 
+import com.agrofarm.api.dto.crops.CropDetails;
 import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
 import com.agrofarm.api.dto.crops.NewCropRequest;
@@ -52,7 +53,7 @@ public class CropController {
 
 
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> getCropDetails(
+    public ResponseEntity<?> insertCropDetails(
             @RequestPart("crop") String cropJson,
             @RequestPart(
                     value = "image",
@@ -80,8 +81,14 @@ public class CropController {
         return ResponseEntity.ok("Crop received successfully");
 
 
+    }
 
 
+    @PostMapping("/crops")
+    public List<CropDetails> getCropDetails(@RequestBody Long farmID){
+
+        return cropService.getCropDetails(farmID);
 
     }
+
 }

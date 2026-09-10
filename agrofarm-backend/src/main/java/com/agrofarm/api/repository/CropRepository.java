@@ -1,5 +1,6 @@
 package com.agrofarm.api.repository;
 
+import com.agrofarm.api.dto.crops.CropDetails;
 import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
 import com.agrofarm.api.dto.crops.NewCropRequest;
@@ -13,4 +14,5 @@ public interface CropRepository {
     public List<Fields> findFieldsFromFarmID(Long ID);
     public Long insertNewCrop (NewCropRequest cropDTO);
     public void insertImage(String image_url, Long cropId);
+    public List<CropDetails> findCropDetailsFromFarmID(Long farmID);
 }

@@ -1,5 +1,6 @@
 package com.agrofarm.api.service.impl;
 
+import com.agrofarm.api.dto.crops.CropDetails;
 import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
 import com.agrofarm.api.dto.crops.NewCropRequest;
@@ -61,6 +62,14 @@ public class CropServiceImpl implements CropService {
 
          String image_link = storageService.uploadFile(image);
          cropRepository.insertImage(image_link, cropId);
+
+    }
+
+
+    @Override
+    public List<CropDetails> getCropDetails(Long farmID){
+
+        return cropRepository.findCropDetailsFromFarmID(farmID);
 
     }
 

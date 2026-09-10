@@ -1,5 +1,6 @@
 package com.agrofarm.api.service;
 
+import com.agrofarm.api.dto.crops.CropDetails;
 import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
 import com.agrofarm.api.dto.crops.NewCropRequest;
@@ -15,4 +16,5 @@ public interface CropService {
     public List<Fields> getFieldDetails(Long id);
     public Long insertCropData(NewCropRequest cropRequest);
     public void insertImage(MultipartFile image, Long cropId);
+    public List<CropDetails> getCropDetails(Long farmID);
 }

@@ -1,5 +1,6 @@
 package com.agrofarm.api.repository.impl;
 
+import com.agrofarm.api.dto.crops.CropDetails;
 import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.crops.Fields;
 import com.agrofarm.api.dto.crops.NewCropRequest;
@@ -106,6 +107,8 @@ public class CropRepositoryImpl implements CropRepository {
     }
 
 
+
+    @Override
     public void insertImage(String image_url, Long cropId){
 
         String sql = """
@@ -121,6 +124,93 @@ public class CropRepositoryImpl implements CropRepository {
         );
 
 
+
+    }
+
+
+    public String findFieldNameByFieldID(Long feildID){
+
+        String fieldName = template.queryForObject(
+                "SELECT field_name FROM fields WHERE id = ? ",
+                String.class,
+                feildID
+        );
+
+        return fieldName;
+    }
+
+    public String findAreaByFieldID(Long fieldID){
+
+        String sql = "SELECT field_size, size_unit FROM fields WHERE id = ?";
+        try {
+            return template.queryForObject(sql, (rs, rowNum) -> {
+
+                Double fieldSize = rs.getDouble("field_size");
+                String sizeUnit = rs.getString("size_unit");
+
+                String area = String.valueOf(fieldSize) + " " + sizeUnit;
+
+                return area;
+            },fieldID);
+        } catch (EmptyResultDataAccessException e) {
+            // Return null or handle the case where no farm is found for this user
+            return null;
+        }
+    }
+
+
+    @Override
+    public List<CropDetails> findCropDetailsFromFarmID(Long farmID){
+
+        String sql = """
+                SELECT
+                    crop_id,
+                    crop_name,
+                    variety,
+                    field_id,
+                    growth_stage,
+                    progress,
+                    status,
+                    plant_date,
+                    harvest_date,
+                    crop_image_url,
+                    plant_date,
+                    harvest_date 
+                FROM crops 
+                WHERE farm_id = ?
+                """;
+        try {
+            return template.query(sql, (rs, rowNum) -> {
+
+                CropDetails crops = new CropDetails();
+
+                crops.setId(rs.getLong("crop_id"));
+                crops.setName(rs.getString("crop_name"));
+                crops.setVariety(rs.getString("variety"));
+
+                // get field ID
+                Long fieldId = rs.getLong("field_id");
+
+                //find the field name
+                String fieldName = findFieldNameByFieldID(fieldId);
+
+                crops.setField(fieldName);
+                crops.setImage(rs.getString("crop_image_url"));
+
+
+                String area = findAreaByFieldID(fieldId);
+                crops.setArea(area);
+                crops.setGrowthStage(rs.getString("growth_stage"));
+                crops.setProgress(rs.getInt("progress"));
+                crops.setStatus(rs.getString("status"));
+                crops.setPlantDate(rs.getTimestamp("plant_date").toLocalDateTime());
+                crops.setHarvestDate(rs.getTimestamp("harvest_date").toLocalDateTime());
+                return crops;
+            },farmID);
+        } catch (EmptyResultDataAccessException e) {
+            // Return null or handle the case where no farm is found for this user
+            return null;
+        }
 
     }
 }
