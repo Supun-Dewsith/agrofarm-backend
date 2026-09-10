@@ -1,9 +1,6 @@
 package com.agrofarm.api.service.impl;
 
-import com.agrofarm.api.dto.crops.CropDetails;
-import com.agrofarm.api.dto.crops.FarmIDs;
-import com.agrofarm.api.dto.crops.Fields;
-import com.agrofarm.api.dto.crops.NewCropRequest;
+import com.agrofarm.api.dto.crops.*;
 import com.agrofarm.api.entity.UserEntity;
 import com.agrofarm.api.repository.CropRepository;
 import com.agrofarm.api.repository.UserRepository;
@@ -71,6 +68,24 @@ public class CropServiceImpl implements CropService {
 
         return cropRepository.findCropDetailsFromFarmID(farmID);
 
+    }
+
+
+    @Override
+    public void deleteCrop(Long cropId){
+        cropRepository.deleteCrop(cropId);
+    }
+
+
+    @Override
+    public void updateCrop(Long cropId, NewCropRequest cropDTO) {
+        cropRepository.updateCrop(cropId, cropDTO);
+    }
+
+
+    @Override
+    public CropUpdateDetails getCropById(Long cropId) {
+        return cropRepository.findCropById(cropId);
     }
 
 

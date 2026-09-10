@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.databind.json.JsonMapper;
+import com.agrofarm.api.dto.crops.CropUpdateDetails;
 
 import java.util.List;
 
@@ -89,6 +90,38 @@ public class CropController {
 
         return cropService.getCropDetails(farmID);
 
+    }
+
+
+
+    @DeleteMapping("/{cropId}")
+    public ResponseEntity<?> deleteCrop(@PathVariable Long cropId) {
+        cropService.deleteCrop(cropId);
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
+    @GetMapping("/{cropId}")
+    public ResponseEntity<CropUpdateDetails> getCropById(
+            @PathVariable Long cropId) {
+
+        CropUpdateDetails crop = cropService.getCropById(cropId);
+
+        return ResponseEntity.ok(crop);
+    }
+
+    
+
+    @PutMapping("/update/{cropId}")
+    public ResponseEntity<?> updateCrop(
+            @PathVariable Long cropId,
+            @RequestBody NewCropRequest cropDTO) {
+
+        cropService.updateCrop(cropId, cropDTO);
+
+        return ResponseEntity.ok("Crop updated successfully");
     }
 
 }

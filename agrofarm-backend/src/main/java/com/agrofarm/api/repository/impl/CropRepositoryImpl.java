@@ -1,9 +1,6 @@
 package com.agrofarm.api.repository.impl;
 
-import com.agrofarm.api.dto.crops.CropDetails;
-import com.agrofarm.api.dto.crops.FarmIDs;
-import com.agrofarm.api.dto.crops.Fields;
-import com.agrofarm.api.dto.crops.NewCropRequest;
+import com.agrofarm.api.dto.crops.*;
 import com.agrofarm.api.repository.CropRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -212,5 +209,102 @@ public class CropRepositoryImpl implements CropRepository {
             return null;
         }
 
+    }
+
+
+    @Override
+    public void deleteCrop(Long cropId) {
+        String sql = """
+            DELETE FROM crops
+            WHERE crop_id = ?
+            """;
+
+        template.update(sql, cropId);
+    }
+
+
+
+    @Override
+    public void updateCrop(Long cropId, NewCropRequest cropDTO) {
+
+        String sql = """
+            UPDATE crops
+            SET crop_name = ?,
+                variety = ?,
+                farm_id = ?,
+                field_id = ?,
+                growth_stage = ?,
+                progress = ?,
+                status = ?,
+                plant_date = ?,
+                harvest_date = ?
+            WHERE crop_id = ?
+            """;
+
+        template.update(
+                sql,
+                cropDTO.getCropName(),
+                cropDTO.getVariety(),
+                cropDTO.getFarmId(),
+                cropDTO.getFieldId(),
+                cropDTO.getGrowthStage(),
+                cropDTO.getProgress(),
+                cropDTO.getStatus(),
+                cropDTO.getPlantDate(),
+                cropDTO.getHarvestDate(),
+                cropId
+        );
+    }
+
+
+    @Override
+    public CropUpdateDetails findCropById(Long cropId) {
+
+        String sql = """
+        SELECT
+            crop_id,
+            crop_name,
+            variety,
+            farm_id,
+            field_id,
+            growth_stage,
+            progress,
+            status,
+            plant_date,
+            harvest_date,
+            crop_image_url
+        FROM crops
+        WHERE crop_id = ?
+        """;
+
+        return template.queryForObject(sql, (rs, rowNum) -> {
+
+            CropUpdateDetails crop = new CropUpdateDetails();
+
+            crop.setId(rs.getLong("crop_id"));
+            crop.setName(rs.getString("crop_name"));
+            crop.setVariety(rs.getString("variety"));
+            crop.setFarmId(rs.getLong("farm_id"));
+            crop.setFieldId(rs.getLong("field_id"));
+            crop.setGrowthStage(rs.getString("growth_stage"));
+            crop.setProgress(rs.getInt("progress"));
+            crop.setStatus(rs.getString("status"));
+            crop.setImage(rs.getString("crop_image_url"));
+
+            if (rs.getTimestamp("plant_date") != null) {
+                crop.setPlantDate(
+                        rs.getTimestamp("plant_date").toLocalDateTime()
+                );
+            }
+
+            if (rs.getTimestamp("harvest_date") != null) {
+                crop.setHarvestDate(
+                        rs.getTimestamp("harvest_date").toLocalDateTime()
+                );
+            }
+
+            return crop;
+
+        }, cropId);
     }
 }
