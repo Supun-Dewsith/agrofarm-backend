@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -26,6 +27,12 @@ public class UserRepositoryImpl implements UserRepository {
         List<String> permissionList = template.query(sql, (rs, rowNum) -> rs.getString("permission_key"), user.getId());
 
         user.setPermissions(new HashSet<>(permissionList));
+    }
+
+    private void populateFarms(UserEntity user) {
+        String sql = "SELECT farm_id FROM farm_assignments WHERE user_id = ?";
+        List<Long> farmIds = template.query(sql, (rs, rowNum) -> rs.getLong("farm_id"), user.getId());
+        user.setFarmIds(farmIds);
     }
 
     @Override
@@ -77,6 +84,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    @Transactional
     public UserEntity save(UserEntity entity) {
         String sql = "INSERT INTO users (user_name, created_at, email, password, phone_number, role, enabled, image_url) VALUES (?,?,?,?,?,?,?,?)";
 
@@ -91,7 +99,8 @@ public class UserRepositoryImpl implements UserRepository {
                 entity.getImageUrl()
         );
 
-        UserEntity savedUser = findByUsername(entity.getUsername()).orElse(null);
+        UserEntity savedUser = findByUsername(entity.getUsername())
+                .orElseThrow(() -> new IllegalStateException("Failed to retrieve created user."));
 
         if (savedUser != null && entity.getPermissions() != null && !entity.getPermissions().isEmpty()) {
             String sqlPerm = "INSERT INTO user_permissions (user_id, permission_key) VALUES (?, ?)";
@@ -103,6 +112,27 @@ public class UserRepositoryImpl implements UserRepository {
                     });
             populatePermissions(savedUser);
         }
+
+        List<Long> farmIds = entity.getFarmIds();
+        if (farmIds != null && !farmIds.isEmpty()) {
+            if ("ADMIN".equalsIgnoreCase(savedUser.getRole().name())) {
+                throw new IllegalArgumentException("ADMIN role cannot be assigned to farms.");
+            }
+
+            if ("FARMER".equalsIgnoreCase(savedUser.getRole().name()) && farmIds.size() > 1) {
+                throw new IllegalArgumentException("A FARMER can only be assigned to a single farm.");
+            }
+
+            String sqlFarms = "INSERT INTO farm_assignments (user_id, farm_id) VALUES (?, ?)";
+
+            template.batchUpdate(sqlFarms, farmIds, farmIds.size(),
+                    (ps, farmId) -> {
+                        ps.setLong(1, savedUser.getId());
+                        ps.setLong(2, farmId);
+                    });
+            populateFarms(savedUser);
+        }
+
         return savedUser;
     }
 

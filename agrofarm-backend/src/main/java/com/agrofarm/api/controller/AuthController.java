@@ -1,9 +1,9 @@
 package com.agrofarm.api.controller;
 
-import com.agrofarm.api.dto.AuthResponse;
-import com.agrofarm.api.dto.LoginRequest;
-import com.agrofarm.api.dto.RegisterRequest;
-import com.agrofarm.api.dto.TokenRefreshRequest;
+import com.agrofarm.api.dto.auth.AuthResponse;
+import com.agrofarm.api.dto.auth.LoginRequest;
+import com.agrofarm.api.dto.auth.RegisterRequest;
+import com.agrofarm.api.dto.auth.TokenRefreshRequest;
 import com.agrofarm.api.service.impl.AuthServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

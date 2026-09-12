@@ -1,4 +1,4 @@
-package com.agrofarm.api.dto;
+package com.agrofarm.api.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

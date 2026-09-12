@@ -1,4 +1,4 @@
-package com.agrofarm.api.dto;
+package com.agrofarm.api.dto.auth;
 
 import com.agrofarm.api.util.Role;
 import jakarta.validation.constraints.Email;
@@ -7,7 +7,10 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -29,4 +32,6 @@ public class RegisterRequest {
     private Role role;
 
     private Set<String> permissions = new HashSet<>();
+    private List<Long> farmIds = new ArrayList<>();
+
 }

@@ -1,5 +1,6 @@
 package com.agrofarm.api.service.impl;
 
+import com.agrofarm.api.dto.auth.AvailableFarmsResponse;
 import com.agrofarm.api.dto.user.UserData;
 import com.agrofarm.api.repository.UserManagementRepository;
 import com.agrofarm.api.service.UserManagementService;
@@ -17,4 +18,15 @@ public class UserManagementServiceImpl implements UserManagementService {
     public List<UserData> getAll() {
         return userManagementRepository.getAll();
     }
+
+    @Override
+    public AvailableFarmsResponse getAvailableFarms() {
+        return userManagementRepository.getAvailableFarms();
+    }
+
+    @Override
+    public AvailableFarmsResponse getAvailableFarmsByOwnerId(Long ownerId) {
+        return userManagementRepository.getAvailableFarmsByOwnerId(ownerId);
+    }
+
 }
