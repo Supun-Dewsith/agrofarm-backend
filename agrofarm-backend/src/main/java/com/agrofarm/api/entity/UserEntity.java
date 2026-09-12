@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -25,6 +27,7 @@ public class UserEntity {
     private Boolean enabled;
     private String imageUrl;
     private Set<String> permissions = new HashSet<>();
+    private List<Long> farmIds = new ArrayList<>();
 
     public UserEntity(Long id, String username, LocalDateTime createdAt, String email,
                       String password, String phoneNumber, Role role, Boolean enabled, String imageUrl) {
@@ -37,6 +40,5 @@ public class UserEntity {
         this.role = role;
         this.enabled = enabled;
         this.imageUrl = imageUrl;
-        this.permissions = new HashSet<>();
     }
 }
