@@ -1,9 +1,9 @@
 package com.agrofarm.api.service.impl;
 
-import com.agrofarm.api.dto.AuthResponse;
-import com.agrofarm.api.dto.LoginRequest;
-import com.agrofarm.api.dto.RegisterRequest;
-import com.agrofarm.api.dto.TokenRefreshRequest;
+import com.agrofarm.api.dto.auth.AuthResponse;
+import com.agrofarm.api.dto.auth.LoginRequest;
+import com.agrofarm.api.dto.auth.RegisterRequest;
+import com.agrofarm.api.dto.auth.TokenRefreshRequest;
 import com.agrofarm.api.entity.UserEntity;
 import com.agrofarm.api.exception.TokenRefreshException;
 import com.agrofarm.api.repository.RefreshTokenRepository;
@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 @Service
@@ -62,6 +63,10 @@ public class AuthServiceImpl implements AuthService {
             entity.setPermissions(new HashSet<>(request.getPermissions()));
         }
 
+        if(request.getFarmIds() != null){
+            entity.setFarmIds(new ArrayList<>(request.getFarmIds()));
+        }
+
         userRepository.save(entity);
 
         UserEntity savedUser = userRepository.findByUsername(entity.getUsername())
@@ -73,6 +78,7 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = tokenService.createAndSaveRefreshToken(savedUser.getId());
 
         return new AuthResponse(
+                savedUser.getId(),
                 accessToken,
                 refreshToken,
                 savedUser.getUsername(),
@@ -104,6 +110,7 @@ public class AuthServiceImpl implements AuthService {
         );
 
         return new AuthResponse(
+                userDetails.getId(),
                 accessToken,
                 refreshToken,
                 userDetails.getUsername(),
@@ -129,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
                             .map(GrantedAuthority::getAuthority)
                             .findFirst().orElse("FARMER"));
 
-                    return new AuthResponse(newAccessToken, requestRefreshToken, user.getUsername(), role ,user.getPermissions(),user.getImageUrl());
+                    return new AuthResponse(user.getId(), newAccessToken, requestRefreshToken, user.getUsername(), role ,user.getPermissions(),user.getImageUrl());
                 })
                 .orElseThrow(() -> new TokenRefreshException("Refresh token is invalid or not found!"));
     }
