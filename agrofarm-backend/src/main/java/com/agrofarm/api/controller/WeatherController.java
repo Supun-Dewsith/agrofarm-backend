@@ -35,4 +35,13 @@ public class WeatherController {
         CurrentWeather currentWeather = weatherService.getCurrentWeatherForUser(currentUsername);
         return ResponseEntity.ok(currentWeather);
     }
+
+    @PostMapping("/all")
+    public ResponseEntity<WeatherResponse> getallWeather(@RequestBody Long Farmid) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        WeatherResponse weather = weatherService.getWeatherForFarm(Farmid);
+        return ResponseEntity.ok(weather);
+    }
 }
