@@ -10,9 +10,15 @@ public record QrAttendanceResponse(
 
         LocalDateTime checkInTime,
 
+        LocalDateTime checkOutTime,
+
+        String status,
+
         Double latitude,
 
-        Double longitude
+        Double longitude,
+
+        Double accuracyMeters
 
 ) {
 }
