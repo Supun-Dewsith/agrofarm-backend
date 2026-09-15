@@ -15,6 +15,7 @@ import com.agrofarm.api.entity.UserEntity;
 import com.agrofarm.api.repository.AttendanceRepository;
 import com.agrofarm.api.repository.UserRepository;
 import com.agrofarm.api.service.AttendanceService;
+import com.agrofarm.api.service.NotificationService;
 import com.agrofarm.api.util.Role;
 import com.agrofarm.api.util.Status;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -57,6 +58,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private UserEntity currentUser() {
@@ -369,6 +371,10 @@ public class AttendanceServiceImpl implements AttendanceService {
                     accuracyMeters
             );
 
+            notificationService.notifyAttendanceMarked(
+                    saved.id(), farmId, worker.getId(), worker.getUsername(), "CHECK_IN"
+            );
+
             return new QrAttendanceResponse(
                     true,
                     "Attendance check-in marked successfully",
@@ -391,6 +397,10 @@ public class AttendanceServiceImpl implements AttendanceService {
                     latitude,
                     longitude,
                     accuracyMeters
+            );
+
+            notificationService.notifyAttendanceMarked(
+                    saved.id(), farmId, worker.getId(), worker.getUsername(), "CHECK_OUT"
             );
 
             return new QrAttendanceResponse(
