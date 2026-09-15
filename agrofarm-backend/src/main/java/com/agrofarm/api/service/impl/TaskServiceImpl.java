@@ -12,6 +12,7 @@ import com.agrofarm.api.repository.TaskRepository;
 import com.agrofarm.api.repository.UserRepository;
 
 import com.agrofarm.api.service.TaskService;
+import com.agrofarm.api.service.NotificationService;
 
 import com.agrofarm.api.util.Role;
 import com.agrofarm.api.util.TaskStatus;
@@ -36,15 +37,18 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final NotificationService notificationService;
 
     public TaskServiceImpl(
             TaskRepository taskRepository,
             UserRepository userRepository,
-            JdbcTemplate jdbcTemplate
+            JdbcTemplate jdbcTemplate,
+            NotificationService notificationService
     ) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.jdbcTemplate = jdbcTemplate;
+        this.notificationService = notificationService;
     }
 
     /* =====================================================
@@ -583,6 +587,11 @@ public class TaskServiceImpl implements TaskService {
                     workerId
             );
         }
+
+        notificationService.notifyTaskAssigned(
+                savedTask.getId(), savedTask.getTitle(),
+                savedTask.getSupervisorId(), workerIds
+        );
 
         return toResponse(
                 findTask(savedTask.getId())
