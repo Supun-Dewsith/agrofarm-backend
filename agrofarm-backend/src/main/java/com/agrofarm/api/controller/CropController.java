@@ -38,7 +38,6 @@ public class CropController {
         String currentUsername = authentication.getName();
         String role = cropService.findRoleByUsername(currentUsername);
 
-        System.out.println(role);
 
         if (role.equals("FARMER")|| role.equals("SUPERVISOR")) {
 
@@ -81,13 +80,7 @@ public class CropController {
                         cropJson,
                         NewCropRequest.class
                 );
-        if (image != null) {
-            System.out.println(
-                    "Image name: " +
-                            image.getOriginalFilename()
-            );
 
-        }
 
         Long cropId = cropService.insertCropData(cropDTO);
         cropService.insertImage(image,cropId);

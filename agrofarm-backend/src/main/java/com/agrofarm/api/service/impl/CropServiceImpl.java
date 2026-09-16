@@ -36,9 +36,7 @@ public class CropServiceImpl implements CropService {
         Long id = weatherRepository.findDetailsByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        System.out.println("userid: "+id );
 
-        System.out.println("going to cropripository");
 
         return cropRepository.findFarmIdsFromUserID(id);
 
@@ -108,9 +106,7 @@ public class CropServiceImpl implements CropService {
         Long id = weatherRepository.findDetailsByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        System.out.println("userid: "+id );
 
-        System.out.println("going to cropripository");
 
         return cropRepository.findAdminFarmIdsFromUserID(id);
     }

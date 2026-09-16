@@ -32,7 +32,6 @@ public class CropRepositoryImpl implements CropRepository {
 
                 String role = rs.getString("role");
 
-                System.out.println("role: "+role);
                 return role;
             },currentUsername);
         } catch (EmptyResultDataAccessException e) {
@@ -51,7 +50,6 @@ public class CropRepositoryImpl implements CropRepository {
 
                 String farmname = rs.getString("farm_name");
 
-                System.out.println("farmname: "+farmname);
                 return farmname;
             },farmID);
         } catch (EmptyResultDataAccessException e) {
@@ -81,14 +79,12 @@ public class CropRepositoryImpl implements CropRepository {
                 String farmname = findFarmNameByFarmID(farmID);
                 IDs.setFarmNames(farmname);
 
-                System.out.println("Repository "+IDs);
 
                 return IDs;
 
             }, ID);
 
         } catch (EmptyResultDataAccessException e) {
-            System.out.println("Error");
             return null;
         }
     }
