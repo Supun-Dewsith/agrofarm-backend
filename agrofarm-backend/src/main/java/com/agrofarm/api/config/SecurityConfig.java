@@ -91,6 +91,8 @@ public class SecurityConfig {
 
 
                         .requestMatchers("/api/weather/**").permitAll()
+
+                        .requestMatchers("/api/worker/**").hasAnyAuthority("SUPERVISOR", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

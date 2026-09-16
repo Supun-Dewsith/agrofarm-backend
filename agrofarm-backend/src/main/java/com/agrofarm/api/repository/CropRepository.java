@@ -17,4 +17,5 @@ public interface CropRepository {
     public CropUpdateDetails findCropById(Long cropId);
     public String findRoleByUsername(String currentUsername);
     public List<FarmIDs> findAdminFarmIdsFromUserID(Long id);
+    public String findFarmNameByFarmID(Long farmID);
 }

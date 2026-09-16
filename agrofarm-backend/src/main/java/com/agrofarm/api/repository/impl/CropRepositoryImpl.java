@@ -42,6 +42,7 @@ public class CropRepositoryImpl implements CropRepository {
 
     }
 
+    @Override
     public String findFarmNameByFarmID(Long farmID){
 
         String sql = "SELECT farm_name FROM farms WHERE id = ?";
