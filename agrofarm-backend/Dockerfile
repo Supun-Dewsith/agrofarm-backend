@@ -16,3 +16,5 @@ COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+#create non-root user then swtch to it to stop the service running in root privilage
