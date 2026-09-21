@@ -1,5 +1,7 @@
 package com.agrofarm.api.controller;
 
+import com.agrofarm.api.dto.disease.DiseaseChatRequest;
+import com.agrofarm.api.dto.disease.DiseaseChatResponse;
 import com.agrofarm.api.service.DiseaseAnalysisService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +37,13 @@ public class DiseaseAnalysisController {
             return ResponseEntity.internalServerError()
                     .body("{\"error\": \"Failed to process image: " + e.getMessage() + "\"}");
         }
+    }
+
+    @PostMapping(value = "/chat", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DiseaseChatResponse> chat(@RequestBody DiseaseChatRequest request) {
+        if (request.question() == null || request.question().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(diseaseAnalysisService.chatAboutDetection(request));
     }
 }

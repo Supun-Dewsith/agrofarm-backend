@@ -1,5 +1,7 @@
 package com.agrofarm.api.service.impl;
 
+import com.agrofarm.api.dto.disease.DiseaseChatRequest;
+import com.agrofarm.api.dto.disease.DiseaseChatResponse;
 import com.agrofarm.api.service.DiseaseAnalysisService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -39,5 +41,15 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
                 .body(body)
                 .retrieve()
                 .body(String.class);
+    }
+
+    @Override
+    public DiseaseChatResponse chatAboutDetection(DiseaseChatRequest request) {
+        return restClient.post()
+                .uri("/disease-chat")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .body(DiseaseChatResponse.class);
     }
 }
