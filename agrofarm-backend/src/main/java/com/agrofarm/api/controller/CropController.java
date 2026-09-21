@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.databind.json.JsonMapper;
 import com.agrofarm.api.dto.crops.CropUpdateDetails;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -35,8 +36,19 @@ public class CropController {
     public List<FarmIDs> getFarmDetails(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
+        String role = cropService.findRoleByUsername(currentUsername);
 
-        return cropService.getFarmDetails(currentUsername);
+
+        if (role.equals("FARMER")|| role.equals("SUPERVISOR")) {
+
+            return cropService.getFarmDetails(currentUsername);
+        }
+        else if (role.equals("ADMIN")) {
+            return cropService.getAdminFarmDetails(currentUsername);
+        }
+        else {
+            return Collections.emptyList();
+        }
 
     }
 
@@ -68,13 +80,7 @@ public class CropController {
                         cropJson,
                         NewCropRequest.class
                 );
-        if (image != null) {
-            System.out.println(
-                    "Image name: " +
-                            image.getOriginalFilename()
-            );
 
-        }
 
         Long cropId = cropService.insertCropData(cropDTO);
         cropService.insertImage(image,cropId);

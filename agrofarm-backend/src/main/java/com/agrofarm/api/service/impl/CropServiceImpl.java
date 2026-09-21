@@ -36,7 +36,10 @@ public class CropServiceImpl implements CropService {
         Long id = weatherRepository.findDetailsByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+
+
         return cropRepository.findFarmIdsFromUserID(id);
+
 
         
     }
@@ -86,6 +89,26 @@ public class CropServiceImpl implements CropService {
     @Override
     public CropUpdateDetails getCropById(Long cropId) {
         return cropRepository.findCropById(cropId);
+    }
+
+
+    @Override
+    public String findRoleByUsername(String currentUsername) {
+        String role = cropRepository.findRoleByUsername(currentUsername);
+        return role;
+    }
+
+
+
+    @Override
+    public List<FarmIDs> getAdminFarmDetails(String username){
+
+        Long id = weatherRepository.findDetailsByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+
+        return cropRepository.findAdminFarmIdsFromUserID(id);
     }
 
 

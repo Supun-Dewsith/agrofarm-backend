@@ -60,4 +60,15 @@ public class WeatherService {
 
         return location;
     }
+
+
+
+    public WeatherResponse getWeatherForFarm(Long Farmid){
+        FarmLocation farmLocation = new FarmLocation();
+
+
+        farmLocation = weatherRepository.findLatitudeAndLongitudeFromFarmID(Farmid);
+        return fetchWeatherFromApi(farmLocation.getLatitude(), farmLocation.getLongitude());
+
+    }
 }

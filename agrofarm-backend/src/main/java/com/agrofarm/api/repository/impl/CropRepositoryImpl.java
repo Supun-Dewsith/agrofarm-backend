@@ -21,24 +21,70 @@ public class CropRepositoryImpl implements CropRepository {
         this.template = template;
     }
 
+
+
+
+    public String findRoleByUsername(String currentUsername){
+
+        String sql = "SELECT role FROM users WHERE user_name = ?";
+        try {
+            return template.queryForObject(sql, (rs, rowNum) -> {
+
+                String role = rs.getString("role");
+
+                return role;
+            },currentUsername);
+        } catch (EmptyResultDataAccessException e) {
+            // Return null or handle the case where no farm is found for this user
+            return null;
+        }
+
+    }
+
+    @Override
+    public String findFarmNameByFarmID(Long farmID){
+
+        String sql = "SELECT farm_name FROM farms WHERE id = ?";
+        try {
+            return template.queryForObject(sql, (rs, rowNum) -> {
+
+                String farmname = rs.getString("farm_name");
+
+                return farmname;
+            },farmID);
+        } catch (EmptyResultDataAccessException e) {
+            // Return null or handle the case where no farm is found for this user
+            return null;
+        }
+    }
+
     @Override
     public List<FarmIDs> findFarmIdsFromUserID(Long ID) {
 
+        String sql = """
+        SELECT farm_id
+        FROM farm_assignments
+        WHERE user_id = ?
+        """;
 
-        String sql = "SELECT id, farm_name FROM farms WHERE owner_id = ?";
         try {
             return template.query(sql, (rs, rowNum) -> {
 
                 FarmIDs IDs = new FarmIDs();
 
+                Long farmID = (rs.getLong("farm_id"));
 
-                IDs.setFarmIDs(rs.getLong("id"));
-                IDs.setFarmNames(rs.getString("farm_name"));
+                IDs.setFarmIDs(rs.getLong("farm_id"));
+
+                String farmname = findFarmNameByFarmID(farmID);
+                IDs.setFarmNames(farmname);
+
+
                 return IDs;
+
             }, ID);
 
         } catch (EmptyResultDataAccessException e) {
-            // Return null or handle the case where no farm is found for this user
             return null;
         }
     }
@@ -306,5 +352,24 @@ public class CropRepositoryImpl implements CropRepository {
             return crop;
 
         }, cropId);
+    }
+
+
+
+    @Override
+    public List<FarmIDs> findAdminFarmIdsFromUserID(Long id){
+
+        String sql = "SELECT id, farm_name FROM farms WHERE owner_id = ?";
+        try {
+            return template.query(sql, (rs, rowNum) -> {
+                FarmIDs IDs = new FarmIDs();
+                IDs.setFarmIDs(rs.getLong("id"));
+                IDs.setFarmNames(rs.getString("farm_name"));
+                return IDs;
+            }, id);
+        } catch (EmptyResultDataAccessException e) {
+            // Return null or handle the case where no farm is found for this user return null; }
+            return null;
+        }
     }
 }

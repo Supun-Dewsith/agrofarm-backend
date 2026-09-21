@@ -15,4 +15,7 @@ public interface CropRepository {
     public void deleteCrop(Long cropId);
     public void updateCrop(Long cropId, NewCropRequest cropDTO);
     public CropUpdateDetails findCropById(Long cropId);
+    public String findRoleByUsername(String currentUsername);
+    public List<FarmIDs> findAdminFarmIdsFromUserID(Long id);
+    public String findFarmNameByFarmID(Long farmID);
 }
