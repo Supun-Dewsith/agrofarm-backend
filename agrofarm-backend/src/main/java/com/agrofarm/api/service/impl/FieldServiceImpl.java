@@ -3,11 +3,16 @@ package com.agrofarm.api.service.impl;
 import com.agrofarm.api.dto.FieldRequest;
 import com.agrofarm.api.dto.FieldResponse;
 import com.agrofarm.api.entity.Field;
-import com.agrofarm.api.repository.FieldRepository;
+import com.agrofarm.api.entity.UserEntity;
 import com.agrofarm.api.repository.FarmRepository;
+import com.agrofarm.api.repository.FieldRepository;
+import com.agrofarm.api.service.FarmAccessService;
 import com.agrofarm.api.service.FieldService;
+import com.agrofarm.api.util.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -17,28 +22,23 @@ public class FieldServiceImpl implements FieldService {
 
     private final FieldRepository fieldRepository;
     private final FarmRepository farmRepository;
+    private final FarmAccessService farmAccessService;
 
     @Override
     public FieldResponse createField(FieldRequest request) {
 
-        // First check that the farm exists
-        farmRepository.findById(request.getFarmId())
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Farm not found with id : "
-                                        + request.getFarmId()
-                        )
-                );
+        UserEntity user = farmAccessService.currentUser();
 
-        Field field = Field.builder()
-                .farmId(request.getFarmId())
-                .fieldName(request.getFieldName())
-                .fieldSize(request.getFieldSize())
-                .sizeUnit(request.getSizeUnit())
-                .latitude(request.getLatitude())
-                .longtitude(request.getLongtitude())
-                .boundary(request.getBoundary())
-                .build();
+        farmAccessService.requireManageFields(
+                user,
+                request.getFarmId()
+        );
+
+        requireExistingFarm(request.getFarmId());
+
+        Field field = new Field();
+
+        applyRequest(field, request);
 
         Field savedField = fieldRepository.save(field);
 
@@ -48,8 +48,17 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public List<FieldResponse> getAllFields() {
 
-        return fieldRepository.findAll()
-                .stream()
+        UserEntity user = farmAccessService.currentUser();
+
+        List<Field> fields;
+
+        if (user.getRole() == Role.ADMIN) {
+            fields = fieldRepository.findAll();
+        } else {
+            fields = fieldRepository.findAssignedToUser(user.getId());
+        }
+
+        return fields.stream()
                 .map(this::mapToResponse)
                 .toList();
     }
@@ -57,12 +66,14 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public FieldResponse getFieldById(Long id) {
 
-        Field field = fieldRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Field not found with id : " + id
-                        )
-                );
+        UserEntity user = farmAccessService.currentUser();
+
+        Field field = findField(id);
+
+        farmAccessService.requireRead(
+                user,
+                field.getFarmId()
+        );
 
         return mapToResponse(field);
     }
@@ -70,12 +81,11 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public List<FieldResponse> getFieldsByFarm(Long farmId) {
 
-        farmRepository.findById(farmId)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Farm not found with id : " + farmId
-                        )
-                );
+        UserEntity user = farmAccessService.currentUser();
+
+        farmAccessService.requireRead(user, farmId);
+
+        requireExistingFarm(farmId);
 
         return fieldRepository.findByFarmId(farmId)
                 .stream()
@@ -89,28 +99,25 @@ public class FieldServiceImpl implements FieldService {
             FieldRequest request
     ) {
 
-        Field field = fieldRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Field not found with id : " + id
-                        )
-                );
+        UserEntity user = farmAccessService.currentUser();
 
-        farmRepository.findById(request.getFarmId())
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Farm not found with id : "
-                                        + request.getFarmId()
-                        )
-                );
+        Field field = findField(id);
 
-        field.setFarmId(request.getFarmId());
-        field.setFieldName(request.getFieldName());
-        field.setFieldSize(request.getFieldSize());
-        field.setSizeUnit(request.getSizeUnit());
-        field.setLatitude(request.getLatitude());
-        field.setLongtitude(request.getLongtitude());
-        field.setBoundary(request.getBoundary());
+        // Check access to the field's existing farm.
+        farmAccessService.requireManageFields(
+                user,
+                field.getFarmId()
+        );
+
+        // Also check the destination farm if the farm is changed.
+        farmAccessService.requireManageFields(
+                user,
+                request.getFarmId()
+        );
+
+        requireExistingFarm(request.getFarmId());
+
+        applyRequest(field, request);
 
         Field updatedField = fieldRepository.save(field);
 
@@ -120,14 +127,52 @@ public class FieldServiceImpl implements FieldService {
     @Override
     public void deleteField(Long id) {
 
-        Field field = fieldRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Field not found with id : " + id
-                        )
-                );
+        UserEntity user = farmAccessService.currentUser();
+
+        Field field = findField(id);
+
+        farmAccessService.requireManageFields(
+                user,
+                field.getFarmId()
+        );
 
         fieldRepository.delete(field);
+    }
+
+    private Field findField(Long id) {
+
+        return fieldRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Field not found"
+                        )
+                );
+    }
+
+    private void requireExistingFarm(Long farmId) {
+
+        farmRepository.findById(farmId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Farm not found"
+                        )
+                );
+    }
+
+    private void applyRequest(
+            Field field,
+            FieldRequest request
+    ) {
+
+        field.setFarmId(request.getFarmId());
+        field.setFieldName(request.getFieldName());
+        field.setFieldSize(request.getFieldSize());
+        field.setSizeUnit(request.getSizeUnit());
+        field.setLatitude(request.getLatitude());
+        field.setLongtitude(request.getLongtitude());
+        field.setBoundary(request.getBoundary());
     }
 
     private FieldResponse mapToResponse(Field field) {
