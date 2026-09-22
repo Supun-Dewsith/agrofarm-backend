@@ -13,6 +13,7 @@ public record UserData(
         String phoneNumber,
         Role role,
         Boolean enabled,
+        String imageUrl,
         Set<String> permissions
 ) {
 }
