@@ -23,7 +23,7 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
     }
 
     @Override
-    public String analyzeLeafImage(MultipartFile file) throws IOException {
+    public String analyzeLeafImage(MultipartFile file, String language) throws IOException {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
         ByteArrayResource fileResource = new ByteArrayResource(file.getBytes()) {
@@ -34,6 +34,7 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
         };
 
         body.add("file", fileResource);
+        body.add("language", (language != null && !language.isBlank()) ? language : "en");
 
         return restClient.post()
                 .uri("/analyze-leaf")
@@ -41,6 +42,11 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
                 .body(body)
                 .retrieve()
                 .body(String.class);
+    }
+
+    @Override
+    public String analyzeLeafImage(MultipartFile file) throws IOException {
+        return analyzeLeafImage(file, "en");
     }
 
     @Override
