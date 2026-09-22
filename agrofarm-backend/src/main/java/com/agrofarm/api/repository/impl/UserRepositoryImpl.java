@@ -90,7 +90,7 @@ public class UserRepositoryImpl implements UserRepository {
 
         template.update(sql,
                 entity.getUsername(),
-                entity.getCreatedAt(),
+                entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now(),
                 entity.getEmail(),
                 entity.getPassword(),
                 entity.getPhoneNumber(),
