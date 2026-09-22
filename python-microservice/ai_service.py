@@ -1,7 +1,7 @@
 import base64
 from typing import List, Optional
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel, Field
 from google import genai
 
@@ -33,16 +33,40 @@ class DiseaseChatRequest(BaseModel):
     question: str
     analysis: Optional[DiseaseAnalysis] = None
     history: List[ChatMessage] = Field(default_factory=list)
+    language: Optional[str] = "en"
 
 class DiseaseChatResponse(BaseModel):
     answer: str
 
 
-def _build_context_prompt(analysis: Optional[DiseaseAnalysis]) -> str:
+def _get_language_instruction(language: Optional[str]) -> str:
+    lang = (language or "en").lower().strip()
+    if lang.startswith("si"):
+        return (
+            "LANGUAGE REQUIREMENT: Respond in Sinhala (සිංහල). "
+            "All text values in the response (including plant_name, disease_name, "
+            "general_description, detected spot descriptions, possible_treatments, and prevention_tips) "
+            "MUST be written in clear, natural Sinhala (සිංහල). "
+            "Common agricultural or botanical terms can include English names in parentheses if helpful for clarity."
+        )
+    elif lang.startswith("ta"):
+        return (
+            "LANGUAGE REQUIREMENT: Respond in Tamil (தமிழ்). "
+            "All text values in the response MUST be written in clear and natural Tamil."
+        )
+    elif lang.startswith("en"):
+        return "LANGUAGE REQUIREMENT: Respond in English."
+    else:
+        return f"LANGUAGE REQUIREMENT: Respond in {language}."
+
+
+def _build_context_prompt(analysis: Optional[DiseaseAnalysis], language: Optional[str] = "en") -> str:
+    lang_instruction = _get_language_instruction(language)
     if analysis is None:
         return (
             "You are an agronomy assistant. The farmer has not completed a leaf scan yet. "
-            "Ask them to run diagnostics first if they need crop-specific advice."
+            "Ask them to run diagnostics first if they need crop-specific advice.\n"
+            f"{lang_instruction}"
         )
     spots = "\n".join(
         f"- {s.description} (confidence {s.confidence:.2f}, box {s.box_2d})"
@@ -53,6 +77,8 @@ def _build_context_prompt(analysis: Optional[DiseaseAnalysis]) -> str:
     return f"""You are an agronomy assistant for AgroFarm. Answer only using this detection result.
 If the farmer asks something not covered, say so and give cautious general advice.
 Keep answers practical and short.
+{lang_instruction}
+
 DETECTED SCAN:
 - Plant: {analysis.plant_name}
 - Healthy: {analysis.is_healthy}
@@ -68,16 +94,22 @@ Prevention:
 """
 
 @app.post("/analyze-leaf", response_model=DiseaseAnalysis)
-async def analyze_leaf(file: UploadFile = File(...)):
+async def analyze_leaf(
+    file: UploadFile = File(...),
+    language: Optional[str] = Form(default="en")
+):
     try:
         image_bytes = await file.read()
         encoded_image = base64.b64encode(image_bytes).decode("utf-8")
 
-        prompt = """
+        lang_instruction = _get_language_instruction(language)
+        prompt = f"""
         Analyze this leaf image for signs of plant disease.
         Identify the disease, describe it, provide treatment steps, and return
         bounding box coordinates [ymin, xmin, ymax, xmax] normalized on a 0-1000 scale
         for each detected spot.
+
+        {lang_instruction}
         """
 
         interaction = client.interactions.create(
@@ -111,7 +143,7 @@ async def disease_chat(payload: DiseaseChatRequest):
         history_text = "\n".join(
             f"{m.role.upper()}: {m.content}" for m in payload.history[-8:]
         )
-        prompt = f"""{_build_context_prompt(payload.analysis)}
+        prompt = f"""{_build_context_prompt(payload.analysis, payload.language)}
 Conversation so far:
 {history_text or "(none)"}
 FARMER QUESTION:
