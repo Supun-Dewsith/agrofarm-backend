@@ -40,6 +40,7 @@ public class UserManagementRepositoryImpl implements UserManagementRepository {
                 u.phone_number, 
                 u.role, 
                 u.enabled, 
+                u.image_url, 
                 p.permission_key
             FROM users u
             LEFT JOIN user_permissions p ON u.id = p.user_id
@@ -69,6 +70,7 @@ public class UserManagementRepositoryImpl implements UserManagementRepository {
                                         rs.getString("phone_number"),
                                         role,
                                         rs.getBoolean("enabled"),
+                                        rs.getString("image_url"),
                                         new HashSet<>()
                                 );
                             } catch (Exception e) {
