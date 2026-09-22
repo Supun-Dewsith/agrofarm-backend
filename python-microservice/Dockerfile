@@ -11,3 +11,5 @@ EXPOSE 5000
 
 # Adjust command based on your framework (FastAPI/Uvicorn, Flask, etc.)
 CMD ["python", "ai_service.py"]
+
+#need to create low privilage user othervise service wil run root privilage
