@@ -113,13 +113,17 @@ async def analyze_leaf(
         """
 
         interaction = client.interactions.create(
-            model="gemini-3.6-flash",
+            # 1. Swapped to the faster, heavily optimized flash variant
+            model="gemini-3.6-flash", 
             input=[
                 {"type": "text", "text": prompt},
                 {
                     "type": "image",
                     "data": encoded_image,
-                    "mime_type": file.content_type or "image/jpeg"
+                    "mime_type": file.content_type or "image/jpeg",
+                    # 2. CRITICAL SPEED UP: Bypasses high-res multi-tile slicing 
+                    # and forces low-latency basic detection
+                    "resolution": "low" 
                 }
             ],
             response_format={
@@ -128,7 +132,8 @@ async def analyze_leaf(
                 "schema": DiseaseAnalysis.model_json_schema()
             },
             generation_config={
-                "thinking_level": "minimal"
+                # 3. Turns off advanced chain-of-thought/dynamic thinking
+                "thinking_level": "minimal" 
             }
         )
 
