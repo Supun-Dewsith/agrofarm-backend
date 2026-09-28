@@ -113,16 +113,14 @@ async def analyze_leaf(
         """
 
         interaction = client.interactions.create(
-            # 1. Swapped to the faster, heavily optimized flash variant
-            model="gemini-3.6-flash", 
+            model="gemini-3.5-flash-lite", 
             input=[
                 {"type": "text", "text": prompt},
                 {
                     "type": "image",
                     "data": encoded_image,
                     "mime_type": file.content_type or "image/jpeg",
-                    # 2. CRITICAL SPEED UP: Bypasses high-res multi-tile slicing 
-                    # and forces low-latency basic detection
+                    # forces low-latency basic detection
                     "resolution": "low" 
                 }
             ],
@@ -132,7 +130,6 @@ async def analyze_leaf(
                 "schema": DiseaseAnalysis.model_json_schema()
             },
             generation_config={
-                # 3. Turns off advanced chain-of-thought/dynamic thinking
                 "thinking_level": "minimal" 
             }
         )
@@ -155,7 +152,7 @@ FARMER QUESTION:
 {payload.question}
 """
         interaction = client.interactions.create(
-            model="gemini-3.6-flash",
+            model="gemini-3.5-flash-lite",
             input=[{"type": "text", "text": prompt}],
             generation_config={"thinking_level": "minimal"},
         )
