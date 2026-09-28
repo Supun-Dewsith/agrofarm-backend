@@ -113,13 +113,15 @@ async def analyze_leaf(
         """
 
         interaction = client.interactions.create(
-            model="gemini-3.6-flash",
+            model="gemini-3.5-flash-lite", 
             input=[
                 {"type": "text", "text": prompt},
                 {
                     "type": "image",
                     "data": encoded_image,
-                    "mime_type": file.content_type or "image/jpeg"
+                    "mime_type": file.content_type or "image/jpeg",
+                    # forces low-latency basic detection
+                    "resolution": "low" 
                 }
             ],
             response_format={
@@ -128,7 +130,7 @@ async def analyze_leaf(
                 "schema": DiseaseAnalysis.model_json_schema()
             },
             generation_config={
-                "thinking_level": "minimal"
+                "thinking_level": "minimal" 
             }
         )
 
@@ -150,7 +152,7 @@ FARMER QUESTION:
 {payload.question}
 """
         interaction = client.interactions.create(
-            model="gemini-3.6-flash",
+            model="gemini-3.5-flash-lite",
             input=[{"type": "text", "text": prompt}],
             generation_config={"thinking_level": "minimal"},
         )
