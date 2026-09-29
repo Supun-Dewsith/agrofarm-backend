@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,16 +21,14 @@ public class FieldController {
     private final FieldService fieldService;
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<FieldResponse> createField(
             @Valid @RequestBody FieldRequest request
     ) {
 
-        FieldResponse response =
-                fieldService.createField(request);
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(response);
+                .body(fieldService.createField(request));
     }
 
     @GetMapping
@@ -61,6 +60,7 @@ public class FieldController {
     }
 
     @PutMapping("/{id:\\d+}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<FieldResponse> updateField(
             @PathVariable Long id,
             @Valid @RequestBody FieldRequest request
@@ -72,6 +72,7 @@ public class FieldController {
     }
 
     @DeleteMapping("/{id:\\d+}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<String> deleteField(
             @PathVariable Long id
     ) {
