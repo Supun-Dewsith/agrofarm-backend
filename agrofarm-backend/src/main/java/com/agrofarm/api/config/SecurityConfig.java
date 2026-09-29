@@ -81,7 +81,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/inventory/**").hasAuthority("INVENTORY")
                         .requestMatchers("/api/analytics/**").hasAuthority("ANALYTICS")
 
-                        .requestMatchers("/api/auth/register").hasAnyAuthority("ADMIN", "USER_MGMT")
+                        .requestMatchers("/api/auth/register").hasAnyAuthority("ADMIN", "SUPERVISOR", "CAN_REGISTER_USERS", "USER_MGMT")
 
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/user/**").hasAnyAuthority("FARMER", "ADMIN")
