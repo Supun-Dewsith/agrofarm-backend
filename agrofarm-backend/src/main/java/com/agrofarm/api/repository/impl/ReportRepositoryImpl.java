@@ -57,7 +57,7 @@ public class ReportRepositoryImpl implements ReportRepository {
                 sql.append("AND r.transaction_date <= ? ");
                 params.add(to);
             }
-            sql.append("ORDER BY r.transaction_date DESC");
+            sql.append("ORDER BY r.transaction_date DESC, r.id DESC");
 
             List<FinancialTransactionDto> list = jdbcTemplate.query(sql.toString(), (rs, rowNum) ->
                     FinancialTransactionDto.builder()
@@ -76,15 +76,33 @@ public class ReportRepositoryImpl implements ReportRepository {
                     params.toArray()
             );
 
-            if (!list.isEmpty()) {
-                return list;
+            if (!memoryFinancialList.isEmpty()) {
+                List<FinancialTransactionDto> combined = new ArrayList<>(list);
+                for (FinancialTransactionDto mem : memoryFinancialList) {
+                    boolean matchFarm = (farmId == null || farmId <= 0 || mem.getFarmId().equals(farmId));
+                    boolean matchFrom = (from == null || !mem.getTransactionDate().isBefore(from));
+                    boolean matchTo = (to == null || !mem.getTransactionDate().isAfter(to));
+                    if (matchFarm && matchFrom && matchTo && combined.stream().noneMatch(c -> c.getId().equals(mem.getId()))) {
+                        combined.add(0, mem);
+                    }
+                }
+                return combined;
             }
-        } catch (Exception e) {
-            log.warn("Could not query farm_financial_records table (using fallback mock data): {}", e.getMessage());
-        }
 
-        // Robust fallback data if table not yet populated or migrated
-        return getFallbackFinancialTransactions();
+            return list;
+        } catch (Exception e) {
+            log.warn("Could not query farm_financial_records table: {}", e.getMessage());
+            List<FinancialTransactionDto> filtered = new ArrayList<>();
+            for (FinancialTransactionDto mem : memoryFinancialList) {
+                boolean matchFarm = (farmId == null || farmId <= 0 || mem.getFarmId().equals(farmId));
+                boolean matchFrom = (from == null || !mem.getTransactionDate().isBefore(from));
+                boolean matchTo = (to == null || !mem.getTransactionDate().isAfter(to));
+                if (matchFarm && matchFrom && matchTo) {
+                    filtered.add(mem);
+                }
+            }
+            return filtered;
+        }
     }
 
     @Override
@@ -106,7 +124,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             }
             sql.append("ORDER BY c.crop_id DESC");
 
-            List<CropReportItemDto> list = jdbcTemplate.query(sql.toString(), (rs, rowNum) ->
+            return jdbcTemplate.query(sql.toString(), (rs, rowNum) ->
                     CropReportItemDto.builder()
                             .cropId(rs.getLong("crop_id"))
                             .cropName(rs.getString("crop_name"))
@@ -123,15 +141,10 @@ public class ReportRepositoryImpl implements ReportRepository {
                             .build(),
                     params.toArray()
             );
-
-            if (!list.isEmpty()) {
-                return list;
-            }
         } catch (Exception e) {
-            log.warn("Could not query crops table for report (using fallback mock data): {}", e.getMessage());
+            log.warn("Could not query crops table for report: {}", e.getMessage());
+            return farmId != null ? List.of() : getFallbackCropReports();
         }
-
-        return getFallbackCropReports();
     }
 
     @Override
@@ -159,7 +172,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             }
             sql.append("ORDER BY a.date DESC, a.check_in_time DESC");
 
-            List<AttendanceReportItemDto> list = jdbcTemplate.query(sql.toString(), (rs, rowNum) -> {
+            return jdbcTemplate.query(sql.toString(), (rs, rowNum) -> {
                 LocalDateTime in = rs.getTimestamp("check_in_time") != null ? rs.getTimestamp("check_in_time").toLocalDateTime() : null;
                 LocalDateTime out = rs.getTimestamp("check_out_time") != null ? rs.getTimestamp("check_out_time").toLocalDateTime() : null;
                 Double hours = 0.0;
@@ -167,7 +180,7 @@ public class ReportRepositoryImpl implements ReportRepository {
                     long minutes = java.time.Duration.between(in, out).toMinutes();
                     hours = Math.round((minutes / 60.0) * 100.0) / 100.0;
                 } else if (in != null) {
-                    hours = 8.0; // default estimated full shift
+                    hours = 8.0;
                 }
 
                 return AttendanceReportItemDto.builder()
@@ -185,15 +198,10 @@ public class ReportRepositoryImpl implements ReportRepository {
                         .verified(true)
                         .build();
             }, params.toArray());
-
-            if (!list.isEmpty()) {
-                return list;
-            }
         } catch (Exception e) {
             log.warn("Could not query attendance table for report: {}", e.getMessage());
+            return farmId != null ? List.of() : getFallbackAttendanceReports();
         }
-
-        return getFallbackAttendanceReports();
     }
 
     @Override
@@ -223,7 +231,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             }
             sql.append("ORDER BY t.id DESC");
 
-            List<TaskReportItemDto> list = jdbcTemplate.query(sql.toString(), (rs, rowNum) ->
+            return jdbcTemplate.query(sql.toString(), (rs, rowNum) ->
                     TaskReportItemDto.builder()
                             .id(rs.getLong("id"))
                             .title(rs.getString("title"))
@@ -241,15 +249,10 @@ public class ReportRepositoryImpl implements ReportRepository {
                             .build(),
                     params.toArray()
             );
-
-            if (!list.isEmpty()) {
-                return list;
-            }
         } catch (Exception e) {
             log.warn("Could not query tasks table for report: {}", e.getMessage());
+            return farmId != null ? List.of() : getFallbackTaskReports();
         }
-
-        return getFallbackTaskReports();
     }
 
     @Override
@@ -261,29 +264,27 @@ public class ReportRepositoryImpl implements ReportRepository {
                     "LEFT JOIN users u ON d.user_id = u.id " +
                     "ORDER BY d.created_at DESC LIMIT ?";
 
-            List<DiseaseReportItemDto> list = jdbcTemplate.query(sql, (rs, rowNum) ->
-                    DiseaseReportItemDto.builder()
+            return jdbcTemplate.query(sql, (rs, rowNum) -> {
+                    double conf = rs.getDouble("overall_confidence");
+                    if (conf > 0 && conf <= 1.0) {
+                        conf = Math.round(conf * 1000.0) / 10.0;
+                    }
+                    return DiseaseReportItemDto.builder()
                             .id(rs.getLong("id"))
                             .userId(rs.getLong("user_id"))
                             .userName(rs.getString("user_name"))
                             .plantName(rs.getString("plant_name"))
                             .diseaseName(rs.getString("disease_name"))
                             .isHealthy(rs.getBoolean("is_healthy"))
-                            .confidence(rs.getDouble("overall_confidence"))
+                            .confidence(conf)
                             .treatment(rs.getString("possible_treatments"))
                             .detectedAt(rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : LocalDateTime.now())
-                            .build(),
-                    limit > 0 ? limit : 50
-            );
-
-            if (!list.isEmpty()) {
-                return list;
-            }
+                            .build();
+            }, limit > 0 ? limit : 50);
         } catch (Exception e) {
             log.warn("Could not query disease_detections table for report: {}", e.getMessage());
+            return getFallbackDiseaseReports();
         }
-
-        return getFallbackDiseaseReports();
     }
 
     @Override
@@ -366,69 +367,15 @@ public class ReportRepositoryImpl implements ReportRepository {
                 .recordedByName(recordedByName)
                 .build();
 
-        memoryFinancialList.add(0, created);
+        if (generatedId == null) {
+            memoryFinancialList.add(0, created);
+        }
         return created;
     }
 
     // ==========================================
-    // FALLBACK GENERATORS (Rich and realistic)
+    // FALLBACK GENERATORS (Used only if DB queries throw errors)
     // ==========================================
-
-    private List<FinancialTransactionDto> getFallbackFinancialTransactions() {
-        if (memoryFinancialList.isEmpty()) {
-            memoryFinancialList.addAll(List.of(
-                FinancialTransactionDto.builder()
-                        .id(101L).farmId(1L).farmName("Green Valley Farm").cropId(1L).cropName("Tomato")
-                        .recordType("INCOME").category("CROP_SALES").amount(BigDecimal.valueOf(185000.00))
-                        .transactionDate(LocalDate.now().minusDays(2))
-                        .description("Wholesale harvest sale to Colombo Veg Market (1500kg)")
-                        .recordedByName("Admin User").build(),
-                FinancialTransactionDto.builder()
-                        .id(102L).farmId(1L).farmName("Green Valley Farm").cropId(null)
-                        .recordType("EXPENSE").category("FERTILIZER").amount(BigDecimal.valueOf(32500.00))
-                        .transactionDate(LocalDate.now().minusDays(5))
-                        .description("Purchased organic NPK fertilizer bags and micronutrients")
-                        .recordedByName("Admin User").build(),
-                FinancialTransactionDto.builder()
-                        .id(103L).farmId(1L).farmName("Green Valley Farm").cropId(null)
-                        .recordType("EXPENSE").category("LABOR_WAGES").amount(BigDecimal.valueOf(45000.00))
-                        .transactionDate(LocalDate.now().minusDays(7))
-                        .description("Bi-weekly field labor compensation for 6 workers")
-                        .recordedByName("Supervisor").build(),
-                FinancialTransactionDto.builder()
-                        .id(104L).farmId(2L).farmName("Highland Agro Ridge").cropId(2L).cropName("Chili")
-                        .recordType("INCOME").category("CROP_SALES").amount(BigDecimal.valueOf(98000.00))
-                        .transactionDate(LocalDate.now().minusDays(11))
-                        .description("Direct sale of green chilies to export packhouse")
-                        .recordedByName("Admin User").build(),
-                FinancialTransactionDto.builder()
-                        .id(105L).farmId(1L).farmName("Green Valley Farm").cropId(null)
-                        .recordType("EXPENSE").category("EQUIPMENT").amount(BigDecimal.valueOf(18500.00))
-                        .transactionDate(LocalDate.now().minusDays(14))
-                        .description("Irrigation pump servicing and replacement filter mesh")
-                        .recordedByName("Supervisor").build(),
-                FinancialTransactionDto.builder()
-                        .id(106L).farmId(2L).farmName("Highland Agro Ridge").cropId(3L).cropName("Rice")
-                        .recordType("INCOME").category("CROP_SALES").amount(BigDecimal.valueOf(220000.00))
-                        .transactionDate(LocalDate.now().minusDays(20))
-                        .description("Bulk harvest delivery to regional grain store")
-                        .recordedByName("Admin User").build(),
-                FinancialTransactionDto.builder()
-                        .id(107L).farmId(1L).farmName("Green Valley Farm").cropId(null)
-                        .recordType("EXPENSE").category("SEEDS").amount(BigDecimal.valueOf(28000.00))
-                        .transactionDate(LocalDate.now().minusDays(26))
-                        .description("Certified high-yield hybrid seed procurement")
-                        .recordedByName("Admin User").build(),
-                FinancialTransactionDto.builder()
-                        .id(108L).farmId(2L).farmName("Highland Agro Ridge").cropId(null)
-                        .recordType("EXPENSE").category("LOGISTICS").amount(BigDecimal.valueOf(15000.00))
-                        .transactionDate(LocalDate.now().minusDays(28))
-                        .description("Refrigerated transport for perishable vegetables")
-                        .recordedByName("Supervisor").build()
-            ));
-        }
-        return new ArrayList<>(memoryFinancialList);
-    }
 
     private List<CropReportItemDto> getFallbackCropReports() {
         return List.of(

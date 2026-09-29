@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -52,38 +55,91 @@ public class ReportServiceImpl implements ReportService {
         long pendingTasks = tasks.stream().filter(t -> !"COMPLETED".equalsIgnoreCase(t.getStatus())).count();
         long diseaseAlerts = disease.stream().filter(d -> Boolean.FALSE.equals(d.getIsHealthy())).count();
 
-        // Build monthly financial trend for charts
-        Map<String, Map<String, BigDecimal>> monthBuckets = new LinkedHashMap<>();
-        LocalDate now = LocalDate.now();
-        for (int i = 5; i >= 0; i--) {
-            LocalDate m = now.minusMonths(i);
-            String label = m.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-            Map<String, BigDecimal> val = new HashMap<>();
-            val.put("Revenue", BigDecimal.ZERO);
-            val.put("Expense", BigDecimal.ZERO);
-            monthBuckets.put(label, val);
+        // Build dynamic financial trend for charts based on 'from' and 'to'
+        LocalDate effectiveTo = (to != null) ? to : LocalDate.now();
+        LocalDate effectiveFrom = (from != null) ? from : effectiveTo.minusDays(30);
+        if (effectiveFrom.isAfter(effectiveTo)) {
+            LocalDate tmp = effectiveFrom;
+            effectiveFrom = effectiveTo;
+            effectiveTo = tmp;
         }
 
-        for (FinancialTransactionDto f : financials) {
-            String label = f.getTransactionDate().getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-            if (monthBuckets.containsKey(label)) {
-                Map<String, BigDecimal> val = monthBuckets.get(label);
-                if ("INCOME".equalsIgnoreCase(f.getRecordType())) {
-                    val.put("Revenue", val.get("Revenue").add(f.getAmount()));
-                } else {
-                    val.put("Expense", val.get("Expense").add(f.getAmount()));
+        long daysBetween = ChronoUnit.DAYS.between(effectiveFrom, effectiveTo);
+        List<Map<String, Object>> financialTrend = new ArrayList<>();
+
+        if (daysBetween <= 31) {
+            // Daily bucketing for 7d / 30d / short ranges
+            Map<LocalDate, Map<String, BigDecimal>> dayBuckets = new LinkedHashMap<>();
+            LocalDate curr = effectiveFrom;
+            while (!curr.isAfter(effectiveTo)) {
+                Map<String, BigDecimal> val = new HashMap<>();
+                val.put("Revenue", BigDecimal.ZERO);
+                val.put("Expense", BigDecimal.ZERO);
+                dayBuckets.put(curr, val);
+                curr = curr.plusDays(1);
+            }
+
+            for (FinancialTransactionDto f : financials) {
+                if (f.getTransactionDate() != null && dayBuckets.containsKey(f.getTransactionDate())) {
+                    Map<String, BigDecimal> val = dayBuckets.get(f.getTransactionDate());
+                    if ("INCOME".equalsIgnoreCase(f.getRecordType())) {
+                        val.put("Revenue", val.get("Revenue").add(f.getAmount()));
+                    } else if ("EXPENSE".equalsIgnoreCase(f.getRecordType())) {
+                        val.put("Expense", val.get("Expense").add(f.getAmount()));
+                    }
                 }
             }
-        }
 
-        List<Map<String, Object>> financialTrend = new ArrayList<>();
-        monthBuckets.forEach((month, map) -> {
-            Map<String, Object> point = new HashMap<>();
-            point.put("month", month);
-            point.put("Revenue", map.get("Revenue"));
-            point.put("Expense", map.get("Expense"));
-            financialTrend.add(point);
-        });
+            DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("MMM dd", Locale.ENGLISH);
+            dayBuckets.forEach((date, map) -> {
+                Map<String, Object> point = new HashMap<>();
+                point.put("month", date.format(dayFormatter));
+                point.put("Revenue", map.get("Revenue"));
+                point.put("Expense", map.get("Expense"));
+                financialTrend.add(point);
+            });
+        } else {
+            // Monthly bucketing for ranges > 31 days (e.g. 90d, 1y)
+            YearMonth startYm = YearMonth.from(effectiveFrom);
+            YearMonth endYm = YearMonth.from(effectiveTo);
+
+            Map<YearMonth, Map<String, BigDecimal>> ymBuckets = new LinkedHashMap<>();
+            YearMonth currYm = startYm;
+            while (!currYm.isAfter(endYm)) {
+                Map<String, BigDecimal> val = new HashMap<>();
+                val.put("Revenue", BigDecimal.ZERO);
+                val.put("Expense", BigDecimal.ZERO);
+                ymBuckets.put(currYm, val);
+                currYm = currYm.plusMonths(1);
+            }
+
+            for (FinancialTransactionDto f : financials) {
+                if (f.getTransactionDate() != null) {
+                    YearMonth ym = YearMonth.from(f.getTransactionDate());
+                    if (ymBuckets.containsKey(ym)) {
+                        Map<String, BigDecimal> val = ymBuckets.get(ym);
+                        if ("INCOME".equalsIgnoreCase(f.getRecordType())) {
+                            val.put("Revenue", val.get("Revenue").add(f.getAmount()));
+                        } else if ("EXPENSE".equalsIgnoreCase(f.getRecordType())) {
+                            val.put("Expense", val.get("Expense").add(f.getAmount()));
+                        }
+                    }
+                }
+            }
+
+            boolean multiYear = startYm.getYear() != endYm.getYear();
+            DateTimeFormatter ymFormatter = multiYear
+                    ? DateTimeFormatter.ofPattern("MMM yy", Locale.ENGLISH)
+                    : DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH);
+
+            ymBuckets.forEach((ym, map) -> {
+                Map<String, Object> point = new HashMap<>();
+                point.put("month", ym.format(ymFormatter));
+                point.put("Revenue", map.get("Revenue"));
+                point.put("Expense", map.get("Expense"));
+                financialTrend.add(point);
+            });
+        }
 
         // Crop stage distribution
         Map<String, Integer> stageCounts = new HashMap<>();
