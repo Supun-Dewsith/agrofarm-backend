@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
 
                         .requestMatchers("/api/crops/**").hasAnyAuthority("ADMIN","FARMER","CROPS", "SUPERVISOR")
+                        .requestMatchers("/api/reports/**").hasAnyAuthority("ADMIN", "SUPERVISOR", "FARMER")
                         .requestMatchers("/api/inventory/**").hasAuthority("INVENTORY")
                         .requestMatchers("/api/analytics/**").hasAuthority("ANALYTICS")
 
