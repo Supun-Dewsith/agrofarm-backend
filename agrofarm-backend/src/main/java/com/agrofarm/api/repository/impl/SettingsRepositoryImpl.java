@@ -4,10 +4,16 @@ import com.agrofarm.api.dto.settings.*;
 import com.agrofarm.api.exception.SettingsException;
 import com.agrofarm.api.repository.SettingsRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class SettingsRepositoryImpl implements SettingsRepository {
@@ -41,26 +47,74 @@ public class SettingsRepositoryImpl implements SettingsRepository {
                        last_name,
                        email,
                        phone_number,
-                       image_url
+                       image_url,
+                       role,
+                       enabled,
+                       created_at
                 FROM users
                 WHERE id = ?
                 """;
 
+        List<String> permissions = Collections.emptyList();
+        try {
+            permissions = template.query(
+                    """
+                    SELECT permission_key
+                    FROM user_permissions
+                    WHERE user_id = ?
+                    ORDER BY permission_key ASC
+                    """,
+                    (rs, rowNum) -> rs.getString("permission_key"),
+                    userId
+            );
+        } catch (Exception e) {
+            log.warn("Failed to load permissions for user {}: {}", userId, e.getMessage());
+        }
+
+        List<String> assignedFarms = Collections.emptyList();
+        try {
+            assignedFarms = template.query(
+                    """
+                    SELECT f.farm_name
+                    FROM farm_assignments fa
+                    JOIN farms f ON f.id = fa.farm_id
+                    WHERE fa.user_id = ?
+                    ORDER BY f.farm_name ASC
+                    """,
+                    (rs, rowNum) -> rs.getString("farm_name"),
+                    userId
+            );
+        } catch (Exception e) {
+            log.warn("Failed to load assigned farms for user {}: {}", userId, e.getMessage());
+        }
+
+        final List<String> finalPermissions = permissions;
+        final List<String> finalAssignedFarms = assignedFarms;
+
         try {
             return template.queryForObject(
                     sql,
-                    (rs, rowNum) -> new ProfileResponse(
-                            rs.getLong("id"),
-                            rs.getString("user_name"),
-                            rs.getString("first_name"),
-                            rs.getString("last_name"),
-                            rs.getString("email"),
-                            rs.getString("phone_number"),
-                            rs.getString("image_url")
-                    ),
+                    (rs, rowNum) -> {
+                        java.sql.Timestamp ts = rs.getTimestamp("created_at");
+                        LocalDateTime createdAt = ts != null ? ts.toLocalDateTime() : null;
+
+                        return new ProfileResponse(
+                                rs.getLong("id"),
+                                rs.getString("user_name"),
+                                rs.getString("first_name"),
+                                rs.getString("last_name"),
+                                rs.getString("email"),
+                                rs.getString("phone_number"),
+                                rs.getString("image_url"),
+                                rs.getString("role"),
+                                rs.getBoolean("enabled"),
+                                createdAt,
+                                finalPermissions,
+                                finalAssignedFarms
+                        );
+                    },
                     userId
             );
-
         } catch (EmptyResultDataAccessException ex) {
             throw new SettingsException("User not found");
         }
