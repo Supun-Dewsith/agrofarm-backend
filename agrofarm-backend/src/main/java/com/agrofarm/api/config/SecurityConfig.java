@@ -78,11 +78,10 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
 
                         .requestMatchers("/api/crops/**").hasAnyAuthority("ADMIN","FARMER","CROPS", "SUPERVISOR")
-                        .requestMatchers("/api/reports/**").hasAnyAuthority("ADMIN", "SUPERVISOR", "FARMER")
-                        .requestMatchers("/api/inventory/**").hasAuthority("INVENTORY")
+                        .requestMatchers("/api/inventory/**").hasAnyAuthority("INVENTORY", "ADMIN", "FARMER", "SUPERVISOR")
                         .requestMatchers("/api/analytics/**").hasAuthority("ANALYTICS")
 
-                        .requestMatchers("/api/auth/register").hasAnyAuthority("ADMIN", "SUPERVISOR", "CAN_REGISTER_USERS", "USER_MGMT")
+                        .requestMatchers("/api/auth/register").hasAnyAuthority("ADMIN", "USER_MGMT")
 
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/user/**").hasAnyAuthority("FARMER", "ADMIN")
