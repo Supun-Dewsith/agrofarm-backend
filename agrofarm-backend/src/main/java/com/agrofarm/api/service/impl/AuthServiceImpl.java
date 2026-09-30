@@ -17,6 +17,8 @@ import com.agrofarm.api.util.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,12 +41,80 @@ public class AuthServiceImpl implements AuthService {
     private final StorageService storageService;
 
     public AuthResponse register(RegisterRequest request, MultipartFile file) {
+        // Authenticate registrar
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("Unauthorized: Authentication required to register users.");
+        }
+
+        String registrarUsername = authentication.getName();
+        UserEntity registrar = userRepository.findByUsername(registrarUsername)
+                .orElseThrow(() -> new AccessDeniedException("Authenticated user not found."));
+
+        Role registrarRole = registrar.getRole();
+        if (registrarRole == Role.FARMER) {
+            throw new AccessDeniedException("Farmers are not permitted to register users.");
+        }
+
+        if (registrarRole == Role.SUPERVISOR) {
+            if (registrar.getPermissions() != null && !registrar.getPermissions().contains("CAN_REGISTER_USERS")) {
+                throw new AccessDeniedException("Supervisor does not have permission to register users.");
+            }
+        }
+
+        Role targetRole = request.getRole();
+        if (targetRole == null) {
+            throw new IllegalArgumentException("System role is required.");
+        }
+
+        // Rule: Remove Admin from system roles
+        if (targetRole == Role.ADMIN) {
+            throw new IllegalArgumentException("Registering an Admin role is not permitted.");
+        }
+
+        // Rule: Admin can register Supervisor and Farmer, but Supervisor can only register Farmer
+        if (registrarRole == Role.ADMIN) {
+            if (targetRole != Role.SUPERVISOR && targetRole != Role.FARMER) {
+                throw new IllegalArgumentException("Admins can only register Supervisors and Farmers.");
+            }
+        } else if (registrarRole == Role.SUPERVISOR) {
+            if (targetRole != Role.FARMER) {
+                throw new IllegalArgumentException("Supervisors can only register Farmers.");
+            }
+            if (registrar.getFarmIds() != null && !registrar.getFarmIds().isEmpty()) {
+                for (Long farmId : request.getFarmIds()) {
+                    if (!registrar.getFarmIds().contains(farmId)) {
+                        throw new IllegalArgumentException("Supervisors can only assign farms that are allocated to them.");
+                    }
+                }
+            }
+        } else {
+            throw new AccessDeniedException("Unauthorized to register users.");
+        }
+
+        // Rule: Can register user permission should be disabled when system role selected to farmer
+        if (targetRole == Role.FARMER && request.getPermissions() != null) {
+            request.getPermissions().remove("CAN_REGISTER_USERS");
+        }
+
+        // Rule: Make unable to register user without farm allocation
+        if (request.getFarmIds() == null || request.getFarmIds().isEmpty()) {
+            throw new IllegalArgumentException("Farm allocation is required. Please assign at least one farm.");
+        }
+
+        if (targetRole == Role.FARMER && request.getFarmIds().size() > 1) {
+            throw new IllegalArgumentException("Farmers can only be assigned to a single farm.");
+        }
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already taken");
         }
 
-        Role role = (request.getRole() != null) ? request.getRole() : Role.FARMER;
+        if (userRepository.findByUsernameOrEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+
+        Role role = targetRole;
 
         String imageUrl = null;
         if (file != null && !file.isEmpty()) {

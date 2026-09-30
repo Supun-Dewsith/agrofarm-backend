@@ -52,6 +52,7 @@ public class UserRepositoryImpl implements UserRepository {
                             rs.getString("image_url")
                     ),username);
             populatePermissions(user);
+            populateFarms(user);
             return Optional.ofNullable(user);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -77,6 +78,7 @@ public class UserRepositoryImpl implements UserRepository {
                     identifier, identifier
             );
             populatePermissions(user);
+            populateFarms(user);
             return Optional.ofNullable(user);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -114,7 +116,11 @@ public class UserRepositoryImpl implements UserRepository {
         }
 
         List<Long> farmIds = entity.getFarmIds();
-        if (farmIds != null && !farmIds.isEmpty()) {
+        if (farmIds == null || farmIds.isEmpty()) {
+            if (savedUser.getRole() != Role.ADMIN) {
+                throw new IllegalArgumentException("Farm allocation is required. Please assign at least one farm.");
+            }
+        } else {
             if ("ADMIN".equalsIgnoreCase(savedUser.getRole().name())) {
                 throw new IllegalArgumentException("ADMIN role cannot be assigned to farms.");
             }
@@ -155,9 +161,10 @@ public class UserRepositoryImpl implements UserRepository {
                 return entity;
             }, id);
             populatePermissions(user);
+            populateFarms(user);
             return Optional.ofNullable(user);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
-}
+}
