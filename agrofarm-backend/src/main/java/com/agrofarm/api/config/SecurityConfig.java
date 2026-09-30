@@ -79,7 +79,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/crops/**").hasAnyAuthority("ADMIN","FARMER","CROPS", "SUPERVISOR")
                         .requestMatchers("/api/reports/**").hasAnyAuthority("ADMIN", "SUPERVISOR", "FARMER")
-                        .requestMatchers("/api/inventory/**").hasAuthority("INVENTORY")
+                        .requestMatchers("/api/inventory/**").hasAnyAuthority("INVENTORY", "ADMIN", "SUPERVISOR", "FARMER")
                         .requestMatchers("/api/analytics/**").hasAuthority("ANALYTICS")
 
                         .requestMatchers("/api/auth/register").hasAnyAuthority("ADMIN", "SUPERVISOR", "CAN_REGISTER_USERS", "USER_MGMT")
