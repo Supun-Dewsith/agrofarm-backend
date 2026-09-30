@@ -13,4 +13,5 @@ public interface ReportService {
     List<TaskReportItemDto> getTaskReport(Long farmId, LocalDate from, LocalDate to);
     List<DiseaseReportItemDto> getDiseaseReport(int limit);
     FinancialTransactionDto createFinancialTransaction(CreateFinancialTransactionRequest request, Long userId);
+    ReportAiChatResponse chatWithReportAssistant(ReportAiChatRequest request);
 }

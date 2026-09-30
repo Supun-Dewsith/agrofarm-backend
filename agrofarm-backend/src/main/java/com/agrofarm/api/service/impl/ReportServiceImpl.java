@@ -3,7 +3,9 @@ package com.agrofarm.api.service.impl;
 import com.agrofarm.api.dto.reports.*;
 import com.agrofarm.api.repository.ReportRepository;
 import com.agrofarm.api.service.ReportService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,13 +16,16 @@ import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+@Slf4j
 @Service
 public class ReportServiceImpl implements ReportService {
 
     private final ReportRepository reportRepository;
+    private final RestClient restClient;
 
-    public ReportServiceImpl(ReportRepository reportRepository) {
+    public ReportServiceImpl(ReportRepository reportRepository, RestClient diseaseAnalysisRestClient) {
         this.reportRepository = reportRepository;
+        this.restClient = diseaseAnalysisRestClient;
     }
 
     @Override
@@ -214,5 +219,82 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public FinancialTransactionDto createFinancialTransaction(CreateFinancialTransactionRequest request, Long userId) {
         return reportRepository.insertFinancialTransaction(request, userId);
+    }
+
+    @Override
+    public ReportAiChatResponse chatWithReportAssistant(ReportAiChatRequest request) {
+        try {
+            Long farmId = request.getFarmId();
+            LocalDate from = request.getFrom();
+            LocalDate to = request.getTo();
+            String activeTab = request.getActiveTab() != null ? request.getActiveTab().toLowerCase() : "financial";
+
+            // 1. Fetch lightweight high-level summary KPIs
+            ReportSummaryDto summary = getSummary(farmId, from, to);
+            Map<String, Object> summaryKpis = new LinkedHashMap<>();
+            summaryKpis.put("total_income", summary.getTotalIncome());
+            summaryKpis.put("total_expense", summary.getTotalExpense());
+            summaryKpis.put("net_profit", summary.getNetProfit());
+            summaryKpis.put("profit_margin_percent", summary.getProfitMargin());
+            summaryKpis.put("active_crops_count", summary.getActiveCropsCount());
+            summaryKpis.put("healthy_crops_count", summary.getHealthyCropsCount());
+            summaryKpis.put("completed_tasks_count", summary.getCompletedTasksCount());
+            summaryKpis.put("pending_tasks_count", summary.getPendingTasksCount());
+            summaryKpis.put("attendance_logs_count", summary.getTotalAttendanceCount());
+            summaryKpis.put("disease_alerts_count", summary.getDiseaseAlertsCount());
+
+            // 2. Fetch specific tab data on demand
+            List<?> tabData;
+            String tabDisplayName;
+            switch (activeTab) {
+                case "crops":
+                    tabDisplayName = "Crop Cultivation";
+                    tabData = getCropReport(farmId);
+                    break;
+                case "attendance":
+                    tabDisplayName = "Labor & Attendance";
+                    tabData = getAttendanceReport(farmId, from, to);
+                    break;
+                case "tasks":
+                    tabDisplayName = "Field Tasks Operations";
+                    tabData = getTaskReport(farmId, from, to);
+                    break;
+                case "disease":
+                    tabDisplayName = "AI Disease Diagnostics History";
+                    tabData = getDiseaseReport(50);
+                    break;
+                case "financial":
+                default:
+                    tabDisplayName = "Financial Ledger";
+                    tabData = getFinancialReport(farmId, from, to);
+                    break;
+            }
+
+            Map<String, Object> sessionContext = new LinkedHashMap<>();
+            sessionContext.put("active_tab", tabDisplayName);
+            sessionContext.put("selected_farm", request.getFarmName() != null ? request.getFarmName() : (farmId != null ? "Farm #" + farmId : "All Farms"));
+            sessionContext.put("date_range", (from != null ? from.toString() : "Start") + " to " + (to != null ? to.toString() : "Today"));
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("message", request.getMessage());
+            payload.put("language", request.getLanguage() != null ? request.getLanguage() : "en");
+            payload.put("session_context", sessionContext);
+            payload.put("summary_kpis", summaryKpis);
+            payload.put("tab_data", tabData);
+            payload.put("history", request.getHistory() != null ? request.getHistory() : List.of());
+
+            return restClient.post()
+                    .uri("/report-chat")
+                    .body(payload)
+                    .retrieve()
+                    .body(ReportAiChatResponse.class);
+
+        } catch (Exception e) {
+            log.error("Error communicating with AI microservice for report chat: {}", e.getMessage(), e);
+            String fallback = "en".equalsIgnoreCase(request.getLanguage())
+                    ? "I'm having trouble analyzing the reports right now. Please try again in a few moments."
+                    : "වාර්තා විශ්ලේෂණය කිරීමේදී දෝෂයක් ඇති විය. කරුණාකර සුළු මොහොතකින් නැවත උත්සාහ කරන්න.";
+            return new ReportAiChatResponse(fallback);
+        }
     }
 }
