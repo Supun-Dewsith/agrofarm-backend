@@ -82,4 +82,11 @@ public class ReportController {
     ) {
         return ResponseEntity.ok(reportService.getDiseaseReport(limit));
     }
+
+    @PostMapping("/ai-chat")
+    public ResponseEntity<ReportAiChatResponse> chatWithReportAssistant(
+            @Valid @RequestBody ReportAiChatRequest request
+    ) {
+        return ResponseEntity.ok(reportService.chatWithReportAssistant(request));
+    }
 }
