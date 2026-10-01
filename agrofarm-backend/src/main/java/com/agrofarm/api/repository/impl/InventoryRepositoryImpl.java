@@ -100,4 +100,33 @@ public class InventoryRepositoryImpl implements InventoryRepository {
 
     }
 
+
+
+    public void updateItem(Integer id, InventoryRequest request){
+
+
+        String sql = """
+        UPDATE inventory
+        SET inventory_name = ?,
+            category = ?,
+            quantity = ?,
+            unit = ?,
+            alertLimit = ?,
+            farm_id = ?
+        WHERE id = ?
+        """;
+
+        jdbcTemplate.update(
+                sql,
+                request.getName(),
+                request.getCategory(),
+                request.getQuantity(),
+                request.getUnit(),
+                request.getAlertLimit(),
+                request.getFarmIds(),
+                id
+        );
+
+    }
+
 }
