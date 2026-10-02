@@ -29,4 +29,6 @@ public interface NotificationService {
             String workerName,
             String action
     );
+
+    void notifyPasswordResetRequested(String usernameOrEmail);
 }
