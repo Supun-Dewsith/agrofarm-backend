@@ -79,4 +79,14 @@ public class InventoryController {
 
     }
 
+
+
+    @PostMapping("/update")
+    public ResponseEntity<?> updateInventoryItem(@RequestBody InventoryRequest inventoryrequest){
+
+        inventoryService.updateInventoryItem(inventoryrequest);
+        return ResponseEntity.ok().build();
+
+    }
+
 }

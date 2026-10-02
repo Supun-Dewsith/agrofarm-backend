@@ -169,4 +169,13 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
 
+
+    public void updateInventoryItem(InventoryRequest inventoryrequest){
+
+        Integer farm_id = inventoryrequest.getId();
+
+        inventoryRepository.updateItem(farm_id, inventoryrequest);
+    }
+
+
 }
