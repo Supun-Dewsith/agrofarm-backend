@@ -403,4 +403,35 @@ public class NotificationServiceImpl implements NotificationService {
             );
         }
     }
+
+    @Override
+    public void notifyPasswordResetRequested(String usernameOrEmail) {
+        if (usernameOrEmail == null || usernameOrEmail.isBlank()) {
+            return;
+        }
+
+        List<Long> adminIds = jdbcTemplate.query(
+                "SELECT id FROM users WHERE role = 'ADMIN' AND enabled = 1",
+                (rs, rowNum) -> rs.getLong("id")
+        );
+
+        if (adminIds.isEmpty()) {
+            adminIds = jdbcTemplate.query(
+                    "SELECT id FROM users WHERE role = 'ADMIN'",
+                    (rs, rowNum) -> rs.getLong("id")
+            );
+        }
+
+        String sanitized = usernameOrEmail.trim();
+        for (Long adminId : adminIds) {
+            insertNotification(
+                    adminId,
+                    "PASSWORD_RESET",
+                    "Password Reset Requested",
+                    "User '" + sanitized + "' has requested password assistance.",
+                    "USER_RESET",
+                    null
+            );
+        }
+    }
 }
