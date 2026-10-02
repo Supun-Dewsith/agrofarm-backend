@@ -8,7 +8,6 @@ import com.agrofarm.api.repository.CropRepository;
 import com.agrofarm.api.repository.InventoryRepository;
 import com.agrofarm.api.repository.WeatherRepository;
 import com.agrofarm.api.service.InventoryService;
-import com.agrofarm.api.service.WeatherService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

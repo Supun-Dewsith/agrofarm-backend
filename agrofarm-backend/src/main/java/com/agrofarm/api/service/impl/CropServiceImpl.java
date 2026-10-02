@@ -1,16 +1,13 @@
 package com.agrofarm.api.service.impl;
 
 import com.agrofarm.api.dto.crops.*;
-import com.agrofarm.api.entity.UserEntity;
 import com.agrofarm.api.repository.CropRepository;
 import com.agrofarm.api.repository.UserRepository;
 import com.agrofarm.api.repository.WeatherRepository;
 import com.agrofarm.api.service.CropService;
 import com.agrofarm.api.service.StorageService;
-import com.agrofarm.api.service.WeatherService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.agrofarm.api.service.StorageService;
 
 
 import java.util.List;
