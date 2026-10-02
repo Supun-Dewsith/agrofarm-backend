@@ -16,4 +16,6 @@ public interface InventoryService {
     public List<AlertLimitData> getAdminLowStockDetails(String currentUsername);
 
     public List<InventoryRequest> getAdminInventoryItems(String username);
+
+    public void updateInventoryItem(InventoryRequest inventoryrequest);
 }

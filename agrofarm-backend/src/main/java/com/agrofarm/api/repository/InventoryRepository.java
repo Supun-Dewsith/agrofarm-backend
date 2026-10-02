@@ -13,4 +13,6 @@ public interface InventoryRepository {
     public List<AlertLimitData> getAlertLimitData(Long farmID);
 
     public List<InventoryRequest> getInventoryItems(Long farmID);
+
+    public void updateItem(Integer id, InventoryRequest request);
 }
