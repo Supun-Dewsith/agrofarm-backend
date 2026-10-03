@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 8000
 
 # Adjust command based on your framework (FastAPI/Uvicorn, Flask, etc.)
 CMD ["python", "ai_service.py"]
