@@ -5,16 +5,16 @@ import com.agrofarm.api.dto.crops.FarmIDs;
 import com.agrofarm.api.dto.workers.WorkerRequest;
 import com.agrofarm.api.service.CropService;
 import com.agrofarm.api.service.WorkerService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @RestController
 
@@ -70,6 +70,19 @@ public class WorkerController {
         } else {
             return Collections.emptyList();
         }
+    }
+
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> deleteWorker(@RequestBody Long ID){
+        boolean deleteWorker = workerService.deleteWorker(ID);
+
+        if (!deleteWorker) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok("User deleted successfully");
+
     }
 
 }
