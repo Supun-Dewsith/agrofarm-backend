@@ -161,4 +161,11 @@ public class WorkerServiceImpl implements WorkerService {
 
         return workers;
     }
+
+
+
+    @Override
+    public boolean deleteWorker(Long id){
+        return workerRepository.deleteWorker(id)>0;
+    }
 }

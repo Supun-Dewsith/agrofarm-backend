@@ -185,4 +185,13 @@ public class WorkerRepositoryImpl implements WorkerRepository{
     }
 
 
+
+
+    @Override
+    public int deleteWorker(Long id){
+        String sql = "DELETE FROM users WHERE id = ?";
+
+        return template.update(sql, id);
+    }
+
 }
