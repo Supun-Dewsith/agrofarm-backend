@@ -10,7 +10,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 96M
+          memory: 160M
 
   agrofarm-backend:
     image: eclipse-temurin:21-jre

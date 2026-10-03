@@ -37,11 +37,12 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           SUPABASE_BUCKET_NAME: ${{ secrets.SUPABASE_BUCKET_NAME }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
         with:
           host: ${{ secrets.AZURE_VM_IP }}
           username: ${{ secrets.AZURE_VM_USER }}
           key: ${{ secrets.AZURE_SSH_KEY }}
-          envs: DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_EXPIRATION,ADMIN_USERNAME,ADMIN_EMAIL,ADMIN_PASSWORD,GEMINI_API_KEY
+          envs: DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET,JWT_EXPIRATION,ADMIN_USERNAME,ADMIN_EMAIL,ADMIN_PASSWORD,GEMINI_API_KEY,SUPABASE_URL,SUPABASE_SERVICE_KEY,SUPABASE_BUCKET_NAME,CORS_ALLOWED_ORIGINS
           script: |
             cd /home/azureuser/agro-farming-manager
             
@@ -56,6 +57,10 @@ jobs:
             ADMIN_EMAIL="${ADMIN_EMAIL}"
             ADMIN_PASSWORD="${ADMIN_PASSWORD}"
             GEMINI_API_KEY="${GEMINI_API_KEY}"
+            CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS}"
+            SUPABASE_URL="${SUPABASE_URL}"
+            SUPABASE_SERVICE_KEY="${SUPABASE_SERVICE_KEY}"
+            SUPABASE_BUCKET_NAME="${SUPABASE_BUCKET_NAME}"
             EOF
             
             # Restart containers using the production compose file
