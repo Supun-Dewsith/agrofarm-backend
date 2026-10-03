@@ -80,4 +80,22 @@ public class DiseaseAnalysisController {
         }
         return ResponseEntity.ok(diseaseAnalysisService.chatAboutDetection(request));
     }
+
+    @PatchMapping(value = "/{id}/link-plot", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> linkPlot(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> payload,
+            @AuthenticationPrincipal AuthenticatedUser user
+    ) {
+        Long userId = (user != null && user.getId() != null) ? user.getId() : 1L;
+        Long farmId = payload.get("farmId") != null ? Long.valueOf(payload.get("farmId").toString()) : null;
+        Long fieldId = payload.get("fieldId") != null ? Long.valueOf(payload.get("fieldId").toString()) : null;
+
+        boolean success = diseaseAnalysisService.linkDetectionToPlot(id, farmId, fieldId, userId);
+        if (success) {
+            return ResponseEntity.ok(Map.of("message", "Plot history logged successfully.", "success", true));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("error", "Failed to link detection to plot.", "success", false));
+        }
+    }
 }
