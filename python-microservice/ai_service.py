@@ -4,11 +4,16 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel, Field
 from google import genai
+from google.genai.types import HttpOptions
 
 load_dotenv()
 
 app = FastAPI(title="Plant Disease Analysis Service")
-client = genai.Client()
+client = genai.Client(
+    http_options={
+        "base_url": "https://gemini-proxy.supundewsith.workers.dev"
+    }
+)
 
 class DetectedSpot(BaseModel):
     box_2d: List[int] = Field(description="[ymin, xmin, ymax, xmax] normalized 0-1000.")
