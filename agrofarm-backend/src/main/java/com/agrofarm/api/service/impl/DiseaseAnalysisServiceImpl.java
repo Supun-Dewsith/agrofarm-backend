@@ -97,6 +97,8 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
         return new DiseaseDetectionResponse(
                 detectionId,
                 userId,
+                null,
+                null,
                 imageUrl,
                 context.plantName(),
                 context.isHealthy(),
@@ -106,6 +108,19 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
                 context.detectedSpots(),
                 context.possibleTreatments(),
                 context.preventionTips(),
+                context.pathogenType(),
+                context.scientificName(),
+                context.optimalTemperature(),
+                context.humidityLevel(),
+                context.weatherCorrelation(),
+                context.lifeCycleStages(),
+                context.yieldLossRisk(),
+                context.yieldLossPercentage(),
+                context.spreadSpeed(),
+                context.harvestImpact(),
+                context.ipmMatrix(),
+                context.probabilityDistribution(),
+                context.referenceImageUrl(),
                 LocalDateTime.now()
         );
     }
@@ -119,5 +134,10 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
     public DiseaseDetectionResponse getDetectionById(Long id, Long userId) {
         return diseaseDetectionRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new RuntimeException("Detection record not found for id: " + id));
+    }
+
+    @Override
+    public boolean linkDetectionToPlot(Long id, Long farmId, Long fieldId, Long userId) {
+        return diseaseDetectionRepository.linkFarmAndField(id, farmId, fieldId, userId);
     }
 }

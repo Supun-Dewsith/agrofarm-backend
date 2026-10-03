@@ -22,4 +22,6 @@ public interface DiseaseAnalysisService {
     List<DiseaseDetectionResponse> getRecentDetections(Long userId, int limit);
 
     DiseaseDetectionResponse getDetectionById(Long id, Long userId);
+
+    boolean linkDetectionToPlot(Long id, Long farmId, Long fieldId, Long userId);
 }

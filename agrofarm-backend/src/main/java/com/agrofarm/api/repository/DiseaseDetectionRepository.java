@@ -10,4 +10,5 @@ public interface DiseaseDetectionRepository {
     Long save(Long userId, String imageUrl, DiseaseAnalysisContext context);
     List<DiseaseDetectionResponse> findRecentByUserId(Long userId, int limit);
     Optional<DiseaseDetectionResponse> findByIdAndUserId(Long id, Long userId);
+    boolean linkFarmAndField(Long id, Long farmId, Long fieldId, Long userId);
 }
