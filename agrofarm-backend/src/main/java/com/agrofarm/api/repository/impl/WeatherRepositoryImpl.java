@@ -45,4 +45,24 @@ public class WeatherRepositoryImpl implements WeatherRepository {
             return null;
         }
     }
+
+
+
+
+    @Override
+    public FarmLocation findLatitudeAndLongitudeFromFarmID(Long ID) {
+        String sql = "SELECT latitude, longtitude FROM farms WHERE id = ?";
+        try {
+            return template.queryForObject(sql, (rs, rowNum) -> {
+                FarmLocation location = new FarmLocation();
+                location.setLatitude(rs.getDouble("latitude"));
+                location.setLongitude(rs.getDouble("longtitude"));
+                return location;
+            }, ID);
+
+        } catch (EmptyResultDataAccessException e) {
+            // Return null or handle the case where no farm is found for this user
+            return null;
+        }
+    }
 }

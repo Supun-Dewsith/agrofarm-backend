@@ -1,5 +1,6 @@
 package com.agrofarm.api.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,5 +27,12 @@ public class ClientConfig {
                 .baseUrl(baseUrl)
                 .requestFactory(new JdkClientHttpRequestFactory(httpClient))
                 .build();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        return mapper;
     }
 }

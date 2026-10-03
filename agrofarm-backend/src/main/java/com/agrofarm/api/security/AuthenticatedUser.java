@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -16,9 +17,12 @@ import java.util.Collection;
 public class AuthenticatedUser implements UserDetails {
     private final Long id;
     private final String username;
+    private final String email;
     private final String password;
     private boolean enabled;
     private final Collection<? extends GrantedAuthority> authorities;
+    private final Set<String> permissions;
+    private final String imageUrl;
 
     @Override
     public boolean isEnabled() {

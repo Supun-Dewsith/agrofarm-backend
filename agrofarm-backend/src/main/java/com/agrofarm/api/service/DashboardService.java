@@ -11,4 +11,14 @@ public interface DashboardService {
     List<FinanceData> getFinanceData();
     List<HarvestSummary> getHarvestSummary();
     List<ActivityItem> getActivityItems();
+    TaskDistribution getTaskDistribution();
+    List<InventoryAlertItem> getLowStockAlerts();
+    List<FarmOverviewItem> getFarmOverviews();
+    List<CropStageDistribution> getCropStageDistribution();
+    List<UpcomingHarvestItem> getUpcomingHarvests();
+    List<ExpenseCategoryBreakdown> getExpenseCategoryBreakdown();
+    List<AttendanceTrendDay> getAttendanceTrend();
+    List<DiseasePrevalenceItem> getDiseasePrevalence();
+    LandUtilization getLandUtilization();
+    DashboardOverviewResponse getDashboardOverview();
 }

@@ -73,15 +73,16 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/request-reset").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
-                        .requestMatchers("/api/crops/**").hasAnyAuthority("ADMIN","CROPS")
-                        .requestMatchers("/api/inventory/**").hasAuthority("INVENTORY")
+                        .requestMatchers("/api/crops/**").hasAnyAuthority("ADMIN","FARMER","CROPS", "SUPERVISOR")
+                        .requestMatchers("/api/reports/**").hasAnyAuthority("ADMIN", "SUPERVISOR", "FARMER")
+                        .requestMatchers("/api/inventory/**").hasAnyAuthority("INVENTORY", "ADMIN", "SUPERVISOR", "FARMER")
                         .requestMatchers("/api/analytics/**").hasAuthority("ANALYTICS")
 
-                        .requestMatchers("/api/auth/register").hasAnyAuthority("ADMIN", "USER_MGMT")
+                        .requestMatchers("/api/auth/register").hasAnyAuthority("ADMIN", "SUPERVISOR", "CAN_REGISTER_USERS", "USER_MGMT")
 
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/user/**").hasAnyAuthority("FARMER", "ADMIN")
@@ -91,6 +92,8 @@ public class SecurityConfig {
 
 
                         .requestMatchers("/api/weather/**").permitAll()
+
+                        .requestMatchers("/api/worker/**").hasAnyAuthority("SUPERVISOR", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

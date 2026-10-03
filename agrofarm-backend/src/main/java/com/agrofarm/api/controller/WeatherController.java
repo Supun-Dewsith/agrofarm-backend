@@ -1,8 +1,8 @@
 package com.agrofarm.api.controller;
 
-import com.agrofarm.api.dto.CurrentWeather;
-import com.agrofarm.api.dto.WeatherResponse;
-import com.agrofarm.api.service.WeatherService;
+import com.agrofarm.api.dto.weather.CurrentWeather;
+import com.agrofarm.api.dto.weather.WeatherResponse;
+import com.agrofarm.api.service.WeatherServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/weather")
 public class WeatherController {
 
-    private final WeatherService weatherService;
+    private final WeatherServiceImpl weatherService;
 
-    public WeatherController(WeatherService weatherService) {
+    public WeatherController(WeatherServiceImpl weatherService) {
         this.weatherService = weatherService;
     }
 
@@ -34,5 +34,14 @@ public class WeatherController {
 
         CurrentWeather currentWeather = weatherService.getCurrentWeatherForUser(currentUsername);
         return ResponseEntity.ok(currentWeather);
+    }
+
+    @PostMapping("/all")
+    public ResponseEntity<WeatherResponse> getallWeather(@RequestBody Long Farmid) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        WeatherResponse weather = weatherService.getWeatherForFarm(Farmid);
+        return ResponseEntity.ok(weather);
     }
 }

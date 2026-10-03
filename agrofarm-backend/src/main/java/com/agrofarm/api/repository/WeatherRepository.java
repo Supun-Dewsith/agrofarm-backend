@@ -11,5 +11,6 @@ public interface WeatherRepository {
 
         Optional<Long> findDetailsByUsername(String username);
         FarmLocation findLatitudeAndLongitudeFromUserID(Long ID);
+        public FarmLocation findLatitudeAndLongitudeFromFarmID(Long ID);
 
 }

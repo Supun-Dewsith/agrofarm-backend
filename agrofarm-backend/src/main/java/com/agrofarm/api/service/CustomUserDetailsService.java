@@ -21,9 +21,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity userEntity = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        UserEntity userEntity = userRepository.findByUsernameOrEmail(identifier)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + identifier));
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(userEntity.getRole().name()));
@@ -37,9 +37,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         return AuthenticatedUser.builder()
                 .id(userEntity.getId())
                 .username(userEntity.getUsername())
+                .email(userEntity.getEmail())
                 .password(userEntity.getPassword())
                 .authorities(authorities)
                 .enabled(userEntity.getEnabled())
+                .permissions(userEntity.getPermissions())
+                .imageUrl(userEntity.getImageUrl())
                 .build();
     }
 }

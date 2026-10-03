@@ -1,27 +1,33 @@
 package com.agrofarm.api.controller;
 
-import com.agrofarm.api.dto.AuthResponse;
-import com.agrofarm.api.dto.LoginRequest;
-import com.agrofarm.api.dto.RegisterRequest;
-import com.agrofarm.api.dto.TokenRefreshRequest;
+import com.agrofarm.api.dto.auth.AuthResponse;
+import com.agrofarm.api.dto.auth.LoginRequest;
+import com.agrofarm.api.dto.auth.RegisterRequest;
+import com.agrofarm.api.dto.auth.TokenRefreshRequest;
+import com.agrofarm.api.service.NotificationService;
 import com.agrofarm.api.service.impl.AuthServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthServiceImpl authService;
+    private final NotificationService notificationService;
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request){
-        return ResponseEntity.ok(authService.register(request));
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AuthResponse> register(
+            @Valid @RequestPart("user") RegisterRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) {
+        return ResponseEntity.ok(authService.register(request, file));
     }
 
     @PostMapping("/login")
@@ -32,5 +38,14 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(@RequestBody TokenRefreshRequest request){
         return ResponseEntity.ok(authService.refreshToken(request));
+    }
+
+    @PostMapping("/request-reset")
+    public ResponseEntity<Map<String, String>> requestPasswordReset(@RequestBody Map<String, String> request) {
+        String usernameOrEmail = request.getOrDefault("usernameOrEmail", "").trim();
+        if (!usernameOrEmail.isEmpty()) {
+            notificationService.notifyPasswordResetRequested(usernameOrEmail);
+        }
+        return ResponseEntity.ok(Map.of("message", "Password reset request submitted successfully"));
     }
 }
