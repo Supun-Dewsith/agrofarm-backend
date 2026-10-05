@@ -360,15 +360,23 @@ Preventative Agronomic Directives:
 @app.post("/analyze-leaf", response_model=DiseaseAnalysis)
 async def analyze_leaf(
     file: UploadFile = File(...),
-    language: Optional[str] = Form(default="en")
+    language: Optional[str] = Form(default="en"),
+    crop: Optional[str] = Form(default=None)
 ):
     try:
         image_bytes = await file.read()
         encoded_image = base64.b64encode(image_bytes).decode("utf-8")
 
         lang_instruction = _get_language_instruction(language)
+        crop_context = (
+            f"\nTarget / Host Crop Context: The farmer explicitly indicates this crop is '{crop.strip()}'. "
+            f"Use this host crop context to accurately identify species-specific pathogens, symptoms, and IPM recommendations if visually consistent.\n"
+            if crop and crop.strip()
+            else ""
+        )
         prompt = f"""
         Perform an in-depth agronomic diagnostic analysis of this plant leaf sample image.
+        {crop_context}
         Provide a complete, actionable diagnostic report containing:
         1. Plant Host Name and Disease Name (or state healthy leaf).
         2. Biological & Pathogen Profile:
