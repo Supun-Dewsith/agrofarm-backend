@@ -33,6 +33,7 @@ public class DiseaseAnalysisController {
     public ResponseEntity<?> analyzeLeaf(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "language", required = false, defaultValue = "en") String language,
+            @RequestParam(value = "crop", required = false) String crop,
             @AuthenticationPrincipal AuthenticatedUser user
     ) {
         if (file == null || file.isEmpty()) {
@@ -41,7 +42,7 @@ public class DiseaseAnalysisController {
 
         try {
             Long userId = (user != null && user.getId() != null) ? user.getId() : 1L;
-            DiseaseDetectionResponse response = diseaseAnalysisService.analyzeAndSave(file, language, userId);
+            DiseaseDetectionResponse response = diseaseAnalysisService.analyzeAndSave(file, language, crop, userId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()

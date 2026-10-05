@@ -43,7 +43,7 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
     }
 
     @Override
-    public String analyzeLeafImage(MultipartFile file, String language) throws IOException {
+    public String analyzeLeafImage(MultipartFile file, String language, String crop) throws IOException {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
         ByteArrayResource fileResource = new ByteArrayResource(file.getBytes()) {
@@ -55,6 +55,9 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
 
         body.add("file", fileResource);
         body.add("language", (language != null && !language.isBlank()) ? language : "en");
+        if (crop != null && !crop.isBlank()) {
+            body.add("crop", crop.trim());
+        }
 
         return restClient.post()
                 .uri("/analyze-leaf")
@@ -65,8 +68,13 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
     }
 
     @Override
+    public String analyzeLeafImage(MultipartFile file, String language) throws IOException {
+        return analyzeLeafImage(file, language, null);
+    }
+
+    @Override
     public String analyzeLeafImage(MultipartFile file) throws IOException {
-        return analyzeLeafImage(file, "en");
+        return analyzeLeafImage(file, "en", null);
     }
 
     @Override
@@ -80,12 +88,12 @@ public class DiseaseAnalysisServiceImpl implements DiseaseAnalysisService {
     }
 
     @Override
-    public DiseaseDetectionResponse analyzeAndSave(MultipartFile file, String language, Long userId) throws IOException {
+    public DiseaseDetectionResponse analyzeAndSave(MultipartFile file, String language, String crop, Long userId) throws IOException {
         // 1. Upload leaf image to Supabase Storage via StorageService
         String imageUrl = storageService.uploadFile(file);
 
-        // 2. Perform leaf disease analysis via Python AI microservice
-        String analysisJson = analyzeLeafImage(file, language);
+        // 2. Perform leaf disease analysis via Python AI microservice (with optional crop context)
+        String analysisJson = analyzeLeafImage(file, language, crop);
 
         // 3. Deserialize JSON result into DiseaseAnalysisContext
         DiseaseAnalysisContext context = objectMapper.readValue(analysisJson, DiseaseAnalysisContext.class);

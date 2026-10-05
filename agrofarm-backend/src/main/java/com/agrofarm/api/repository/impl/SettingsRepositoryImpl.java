@@ -384,12 +384,12 @@ public class SettingsRepositoryImpl implements SettingsRepository {
                 getSystemSettings(userId);
 
         String farmName =
-                request.farmName() != null
+                (request.farmName() != null && !request.farmName().isBlank())
                         ? request.farmName().trim()
                         : current.farmName();
 
         String timezone =
-                request.timezone() != null
+                (request.timezone() != null && !request.timezone().isBlank())
                         ? request.timezone().trim()
                         : current.timezone();
 
