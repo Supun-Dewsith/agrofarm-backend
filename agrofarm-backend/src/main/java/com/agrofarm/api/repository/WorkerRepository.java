@@ -15,4 +15,5 @@ public interface WorkerRepository {
     public String findStatusFromUserId(Long id);
     public Long findFarmIdFromUserID(Long id);
     public List<FarmIDs> findSupervisorFarmIdsFromUserID(Long id);
+    public int deleteWorker(Long id);
 }
